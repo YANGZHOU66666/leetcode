@@ -1,2 +1,2 @@
 # leetcode
-## my notes when solving problems on leetcode
+## My notes when solving problems on leetcode
