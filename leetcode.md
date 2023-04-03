@@ -190,6 +190,16 @@ sums[row2][col2]-sums[row2-1][col1]-sums[row1][col2-1]+sums[row1-1][col1-1]
 
 + point3：二叉树类似层序遍历的，递归时可以返回function(root->left)&&function(root->right)
 
+## #[Q17. 电话号码的字母组合](https://leetcode.cn/problems/letter-combinations-of-a-phone-number/)：回溯模板题（DFS）
+
+## #[300. 最长递增子序列](https://leetcode.cn/problems/longest-increasing-subsequence/)：记忆化搜索/DP模板题
+
++ dp数组：
+
+  dp[i]表示拿原数组中第i个的前i项的最值
+
+  注意dp[i]表示的不是一个nums[i]拿不拿，而是前i个
+
 # 细节补充：
 
 ## Q387：
@@ -283,9 +293,10 @@ P.S.本题另一个小细节：防止重复三元组的出现，三个指针每�
 ## <a id="hash1">哈希表找到两个数运算为target（不用相向双指针的原因是不单调）</a>
 
 + 简易题模板：[面试题 17.05.  字母与数字](https://leetcode.cn/problems/find-longest-subarray-lcci/)：遍历原数组，对每个num[i]若能在表中找到target-num[i]，则找到了；否则将num[i]插入表中。这样的复杂度：o(n)
-+ 一类用前缀和+哈希表处理
++ 一类用前缀和+哈希表处理：常常处理**子数组内部所有数求值**问题，这里会用到前缀和
   + [面试题 17.05.  字母与数字](https://leetcode.cn/problems/find-longest-subarray-lcci/)：用前缀和算i位置前的字母数与数字数的差值。差值为0->字母与数字相等。此后，用哈希表找到前缀和相等的两个位置的距离最大值
   + [1590. 使数组和能被 P 整除](https://leetcode.cn/problems/make-sum-divisible-by-p/)：和上一题大同小异
+  + [2488. 统计中位数为 K 的子数组](https://leetcode.cn/problems/count-subarrays-with-median-k/):
 
 ## 二分
 
@@ -307,7 +318,103 @@ P.S.本题另一个小细节：防止重复三元组的出现，三个指针每�
 
 [982. 按位与为零的三元组](https://leetcode.cn/problems/triples-with-bitwise-and-equal-to-zero/)：先将两个数按位与的值存在一个容器中，再第三个数与这个容器中所有数运算
 
-# 思路特殊的题目积累：
+
+
+## 状态压缩：
+
+
+
+## 递归
+
++ 递归基本思路：
+
+  > 类似**数学归纳法**：
+  >
+  > 1.判断出口条件（如二叉树递归到最后的空节点）；这一点类似数学归纳法中k=1的情形
+  >
+  > 2.从一个问题到下一个子问题
+
+[100. 相同的树](https://leetcode.cn/problems/same-tree/)：
+
+应该return的边界条件：某一棵树遍历到空节点时，看另一棵树这里是否为空来return
+
+递归条件：两个对应节点不相同时return false，否则return子问题
+
++ 恰当的时候可以在递归参数中加入层数：
+
+[199. 二叉树的右视图](https://leetcode.cn/problems/binary-tree-right-side-view/)：
+
+应该return的边界条件：遍历到NULL的节点
+
+递归条件：从一个节点先调用右孩子再调用左孩子（因右视图先看到右孩子）
+
+如果递归层数等于ans数组长度，将节点值放入ans
+
+## 回溯
+
+### 回溯三问：
+
+> 1.当前操作？是枚举什么？
+>
+> 2.子问题？
+>
+> 3.下一个子问题？
+
+[78. 子集](https://leetcode.cn/problems/subsets/)：回溯模板题，两个模板：
+
++ 1.枚举nums中的每个数，看是否放进去（以输入的视角）
+
+```python
+class Solution:
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        n = len(nums)
+        ans = []
+        temp = []
+        def dfs(i):
+            if i == n:
+                ans.append(temp.copy())
+                return
+            else:
+                dfs(i+1) #nums[i]不放进去
+                temp.append(nums[i])
+                dfs(i+1) #nums[i]放进去
+                temp.pop() #第i个数放进去所有情况讨论完了之后清空temp这一位，防止
+        
+        dfs(0)
+        return ans
+```
+
++ 2.枚举放完nums[i]之后下一个放nums的哪一个（以答案的视角）
+
+```python
+class Solution:
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+        n = len(nums)
+        ans = []
+        temp = []
+        def dfs(i):
+            ans.append(temp.copy())
+            if i == n:
+                return
+            else:
+                for j in range(i,n):
+                    temp.append(nums[j])
+                    dfs(j+1)
+                    temp.pop() 
+                    # temp这个位置为nums[j]的所有情况讨论完后，要把这个位置清除，以便讨论该位置为其他数的情况
+        
+        dfs(0)
+        return ans
+```
+
+### 剪枝：
+
+> 一些问题不需要将所有情况回溯一遍，一些不可能实现的结果直接return掉
+
++ 方法：
+
+## 思路特殊的题目积累：
 
 （周赛332）[6356. 子字符串异或查询](https://leetcode.cn/problems/substring-xor-queries/)：暴力把字符串能表示的所有二进制数（答案能取到的）全放进容器里，然后无脑查找
 
+[56. 合并区间](https://leetcode.cn/problems/merge-intervals/)：
