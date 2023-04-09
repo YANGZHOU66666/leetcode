@@ -322,7 +322,9 @@ P.S.本题另一个小细节：防止重复三元组的出现，三个指针每�
 
 ## 状态压缩：
 
+用一个二进制数表示一种状态，常用于【选或不选】这一思路中
 
+这是一个技巧而非一种算法
 
 ## 递归
 
@@ -378,7 +380,7 @@ class Solution:
                 dfs(i+1) #nums[i]不放进去
                 temp.append(nums[i])
                 dfs(i+1) #nums[i]放进去
-                temp.pop() #第i个数放进去所有情况讨论完了之后清空temp这一位，防止
+                temp.pop() #第i个数放进去所有情况讨论完了之后清空temp这一位，否则枚举下一个数的时候这个数还没清掉
         
         dfs(0)
         return ans
@@ -407,11 +409,245 @@ class Solution:
         return ans
 ```
 
+### 排列型回溯
+
++ [46. 全排列](https://leetcode.cn/problems/permutations/)：排列型回溯模板题
+
+递归参数用层数+还没枚举到的数的集合表示
+
+```python
+ans = []
+n = len(nums)
+path = [0] * n
+
+def dfs(i,s):  # s用来表示还没枚举到的所有数的集合
+    if i == n: # 出口条件：所有数字都填进来了，即填了n个数字了
+        ans.append(path.copy()) # 一定要复制副本！
+        return
+    for num in s:
+        path[i] = num
+        dfs(i+1,s-{num})
+
+dfs(0,set(nums))
+return ans
+```
+
+==血泪教训：一定要复制副本path.copy()，而不是直接将path给append进去==
+
+另一种写法：不将还没列举到的数用集合放到递归参数中，而是作为全局变量显示哪种还没放进去
+
+```python
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        ans = []
+        n = len(nums)
+        check = [False] * n
+        path = [0] * n
+        def dfs(i):
+            if i == n:
+                ans.append(path.copy())
+                return
+            for j in range(n):
+                if check[j] == False:
+                    path[i] = nums[j]
+                    check[j] = True
+                    dfs(i+1)
+                    check[j] = False
+        dfs(0)
+        return ans
+```
+
+
+
++ 进阶：[51. N 皇后](https://leetcode.cn/problems/n-queens/)：
+
+基本原理：对于n*n棋盘要放n个皇后，必然有每行、每列各一个
+
+那么对于以行号为索引的列表，必然是1~n-1的一个排列
+
+如：
+
+```python
+.Q.. # 第1列
+...Q # 第3列
+Q... # 第0列
+..Q. # 第2列
+```
+
+对应：
+
+```python
+[1,3,0,2]
+```
+
+故问题转化为排列型回溯
+
+此外，还需验证一下对角线不能放置，这个在每行放的时候验证一下
+
++ 递归入口：从第0行开始枚举
+
++ 递归出口：当n行枚举完后，将答案放入ans中
+
++ 从一个子问题到另一个子问题：放完第i行的后放第i+1行的，已经放置的列不能再放
+
+```python
+class Solution:
+    def solveNQueens(self, n: int) -> List[List[str]]:
+        ans = []
+        col = [0] * n
+        check = [False] * n
+        
+        def valid(r,c): # 检验第r行，第c列能不能放（在前面的r-1行已经放好的情况下）
+            for row in range(r):
+                C = col[row]
+                if row + C == c + r or row - C == r - c:
+                    return False
+            return True
+
+
+        def dfs(i):
+            if i == n:
+                ans.append(['.'*c+'Q'+'.'*(n-c-1) for c in col]) # 生成答案
+                return
+            for j in range(n):
+                if check[j] == False and valid(i,j): # 遍历所有没放过的列，并检验这一列能不能放了
+                    col[i] = j
+                    check[j] = True
+                    dfs(i+1)
+                    check[j] = False # 这种情况结束后记得清理现场
+        
+        dfs(0)
+        return ans
+```
+
+### 组合型回溯
+
+
+
 ### 剪枝：
 
 > 一些问题不需要将所有情况回溯一遍，一些不可能实现的结果直接return掉
 
 + 方法：
+
+## 记忆化搜索/动态规划
+
++ DP萌新三步：
+  + 思考回溯要怎么写
+    + 入参和返回值
+    + 递归到哪里
+    + 递归边界和入口
+  + 改成记忆化搜索
+  + 1:1翻译成递归
+
+例1.[198. 打家劫舍](https://leetcode.cn/problems/house-robber/):
+
++ 首先是考虑写成回溯：
+
+  这里是子集型回溯，有【选或不选】【选哪个】这两种思路
+
+  这里更适合用【选或不选】这个思路
+
+  入参i应为前n个房屋待抢劫的数量
+
+  边界条件应为：当i<0时，返回0（没有房子可以选了）
+
+```c++
+int dfs(int i)//选前i个房子的最大金额数量
+{
+    if(i<0)
+    {
+        return 0;
+    }
+    return max(dfs(i-1),dfs(i-2)+nums[i]);
+}
+```
+
++ 优化为记忆化搜索：
+
+```c++
+int n=nums.size();
+vector<int>cache(n,-1);//-1表示没被计算过
+int dfs(int i)
+{
+    if(i<0)
+    {
+        return 0;
+    }
+    if(cache[i]!=-1)//以前已经计算过前i给的最大值
+    {
+        return cache[i];
+    }
+    int res=max(dfs(i-1),dfs(i-2)+nums[i]);
+    cache[i]=res;
+    return res;
+}
+```
+
++ 逐步翻译为递推：
+
+```c++
+int n=nums.size();
+vector<int>dp(n,-1);
+dp[0]=nums[0];
+dp[1]=nums[1];
+for(int i=2;i<n;i++)
+{
+    dp[i]=max(dp[i-1],dp[i-2]+nums[i]);
+}
+return dp[n-1];
+```
+
+### 背包DP
+
+0-1背包原型：一定容量背包，一些物品，选或不选，总价值最大
+
+从序号最后面的物品w[i]开始枚举
+
+dfs(i,c)表示枚举到第i个物品时（也即当任意选取所有>=i的物品的状态）总容量为c的背包能装下的最大价值
+
++ 出口条件：
+
+```c++
+if(i<0)//没有物品可供枚举了
+{
+    return 0;
+}
+```
+
++ 状态转移方程：
+
+```c++
+dfs(i,c)=max(dfs(i-1,c),dfs(i-1,c-v[i])+w[i])
+```
+
++ 这里注意边界：c-v[i]可能小于0：当剩余容量小于v[i]时就没必要再算了，直接return dfs(i-1,c)
++ 转化为递推：
+
+```c++
+dp[i][c]表示当背包容量为c时，枚举到第i个物品时能够达到的最大价值、
+dp[i][c]=max(dp[i-1][c])
+```
+
++ 变形：
+
+> 至多装capacity，求方案数/最大价值和
+>
+> 恰好装capacity，求方案数/最大/最小价值和
+>
+> 至少装capacity，
+
+## 动态规划题目积累：
+
+[1125. 最小的必要团队](https://leetcode.cn/problems/smallest-sufficient-team/):
+
+<b>一个细节：可以状态压缩</b>
+
+确认回溯类型：子集型回溯，选与不选
+
+以此开始动态规划，dp[i]表示职业技能为i（一个二进制数，表示现已有的状态）所需的最少人数的情况的所有人的集合
+
+
 
 ## 思路特殊的题目积累：
 
