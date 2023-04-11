@@ -86,6 +86,32 @@ pair.first
 pair.second //分别表示第一个和第二个值
 ```
 
+## 8.deque
+
+```c++
+deque<int> a; //初始化
+deque<int> a(10); //空间为10
+deque<int> a(10, 1); //初始化为10个1
+deque<int> b(a);// a全部拷贝给b
+deque<int> b(a.begin(), a.begin()+3);// a中前三个元素拷贝给b
+```
+
+基本操作：
+
+```c++
+deque<int> deq;
+deq.size();//容器大小
+deq.max_size();//容器最大容量
+deq.resize();//更改容器大小
+deq.empty();//容器判空
+deq.shrink_to_fit();//减少容器大小到满足元素所占存储空间的大小
+deq.push_back();//尾部增加元素
+deq.pop_back(); //将最后元素弹出
+deq.pop_front(); //将最前元素弹出
+deq.back(); //返回末尾元素
+deq.front(); //返回开始元素
+```
+
 
 
 

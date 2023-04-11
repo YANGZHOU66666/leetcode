@@ -288,7 +288,152 @@ P.S.本题另一个小细节：防止重复三元组的出现，三个指针每�
 
 ## 单调栈
 
-[1124. 表现良好的最长时间段](https://leetcode.cn/problems/longest-well-performing-interval/)
++ 单调栈模板：
+
+[496. 下一个更大元素 I](https://leetcode.cn/problems/next-greater-element-i/)：
+
+一个形象的理解：后面的矮个被前面的高个“挡住了”，故从后向前遍历，遍历后入栈。若碰到一个“高个”（即大于后面的至少一个数），那么后面的矮个对这个高个前面的所有数就没有价值了，故弹出这些矮个，高个入栈。
+
+```c++
+vector<int> nextGreaterElement(vector<int>& nums) {
+    vector<int> ans(nums.size()); // 存放答案的数组
+    stack<int> s;
+    for (int i = nums.size() - 1; i >= 0; i--) { // 倒着往栈里放
+        while (!s.empty() && s.top() <= nums[i]) { // 判定个子高矮
+            s.pop(); // 矮个起开，反正也被挡着了。。。
+        }
+        ans[i] = s.empty() ? -1 : s.top(); // 这个元素身后的第一个高个
+        s.push(nums[i]); // 进队，接受之后的身高判定吧！
+    }
+    return ans;
+}
+```
+
+另一种写法：
+
+从前面i=0开始遍历，先比较该节点与栈顶的大小，遇到符合情况的更新答案并出栈；将该节点入栈；直到所有节点遍历完毕
+
+这一点在[1019. 链表中的下一个更大节点](https://leetcode.cn/problems/next-greater-node-in-linked-list/)这题中体现，此题为链表，不能从后向前遍历
+
+```python
+def nextLargerNodes(self, head: Optional[ListNode]) -> List[int]:
+    stk = list()
+    ans = list()
+    cur = head
+    idx = -1
+    while cur != None:
+        idx+=1
+        ans.append(0)
+        while stk and stk[-1][1] < cur.val:
+            ans[stk[-1][0]] = cur.val
+            stk.pop()
+        stk.append((idx,cur.val))
+        cur = cur.next
+    return ans
+```
+
++ 解决一段子数组的和>target的最长问题
+
+先把子数组的和通过前缀和转化为两点之差，然后等价于上面的矮个高个，(左边的数+target<右边的数)
+
+不同的是，这里需要找到右边最后一个“高个”而不是第一个“高个”，故模板不一样
+
+[1124. 表现良好的最长时间段](https://leetcode.cn/problems/longest-well-performing-interval/)：
+
+理解一下：若j>i时sums[j]>sums[i]，则j不可能作为左侧数（i肯定比j赚），故j不入栈
+
+再从右边遍历到左边找最大
+
+```c++
+int longestWPI(vector<int>& hours) {
+    int ans=0;
+    stack<int> stk;
+    int n = hours.size();
+    vector<int> sums(n+1,0);
+    stk.push(0);
+    for(int i=0;i<n;i++)
+    {
+        if(hours[i]>8)
+            sums[i+1]=sums[i]+1;
+        else
+            sums[i+1]=sums[i]-1;
+        if(sums[i+1]<sums[stk.top()])
+        {
+            stk.push(i+1);
+        }
+    }
+    for(int j=n;j>0;j--)
+    {
+        while(!stk.empty()&&sums[j]>sums[stk.top()])
+        {
+            ans = max(ans,j-stk.top());
+            stk.pop();
+        }
+    }
+    return ans;
+}
+```
+
+<mark>这题看上去和常规的单调栈有一些不同，因这题是找最远距离而非最长距离，所以需要先从左边遍历入栈，再从右边遍历更新答案</mark>
+
+## 单调队列
+
++ 解决一段子数组的和>target的最短问题
+
+[862. 和至少为K的最短子数组](https://leetcode.cn/problems/shortest-subarray-with-sum-at-least-k/)：
+
+为什么不能用同向双指针？数据流中有负数，不能确定每次指针移动对子数组的和是亏是赚
+
+先算出前缀和，将子数组的和转化为分立的两点之差（通过这种方法也一定程度上解决了有负数的问题）
+
+然后遍历前缀和数组sums，对sums[i]讨论，
+
+若sums[i] - sums[deq.front()] >= target，则这可能是答案，故更新答案；且可能存在更优解，但以deq.front()开始的数组一定不可能是更优解了，故deq.pop_front()
+
+若sums[i] <= sums[deq.back()]，则最优解不可能以deq.back()开头了（因为以i开头的一定更优），故deq.pop_back()
+
+讨论完后将i插入队列
+
+```c++
+class Solution {
+public:
+    int shortestSubarray(vector<int>& nums, int k) {
+        int n=nums.size();
+        vector<long long> sums(n+1,0);
+        for(int i=0;i<n;i++)
+        {
+            sums[i+1] = sums[i] + nums[i];
+        }
+        int ans = n+1;
+        deque<int> que;
+        for(int i=0;i<n+1;i++)
+        {
+            while(!que.empty()&&sums[i]-sums[que.front()]>=k)
+            {
+                ans = min(ans,i-que.front());
+                que.pop_front();
+            }
+            while(!que.empty()&&sums[i]<=sums[que.back()])
+            {
+                que.pop_back();
+            }
+            que.push_back(i);
+        }
+        if(ans<n+1)
+        return ans;
+        else
+        return -1;
+    }
+};
+```
+
+### 单调队列和同向双指针
+
+[209. 长度最小的子数组](https://leetcode.cn/problems/minimum-size-subarray-sum/)：
+
+因为本题所有数均为正数，故当一段和>=target时，必然左指针右移是赚的，故可以用双指针做。用单调队列依然可行，但是空间复杂度会更高
+
+
 
 ## <a id="hash1">哈希表找到两个数运算为target（不用相向双指针的原因是不单调）</a>
 
@@ -325,6 +470,51 @@ P.S.本题另一个小细节：防止重复三元组的出现，三个指针每�
 用一个二进制数表示一种状态，常用于【选或不选】这一思路中
 
 这是一个技巧而非一种算法
+
+## 快速幂：
+
+对于指数n，底数a，o(log n)复杂度计算某数的幂
+
+将n化成二进制，假设n=19，化为10011,则
+
+a^19^=a<sup>2<sup>0</sup>+2<sup>1</sup>+2<sup>4</sup></sup>=a·a<sup>2</sup>·{[(a<sup>2</sup>)<sup>2</sup>]<sup>2</sup>}<sup>2</sup>
+
+故可用位运算的方法，用一数temp存储a的2<sup>i</sup>次幂（i从1到n的二进制位数）逢位数为1时ans*=temp
+
+```C++
+double cal(double a,long long n)
+{
+    if(n==0)
+    {
+        return 1;
+    }
+    double ans = 1;
+    double temp = a;
+    while(n>0)
+    {
+        if(n&1)
+        {
+            ans*=temp;
+        }
+        temp *= temp;
+        n = n>>1;
+    }
+    return ans;
+}
+double myPow(double x, int n) {
+    long long N= n;
+    if(N>=0)
+    {
+        return cal(x,N);
+    }
+    else
+    {
+        return 1.0/cal(x,-N);
+    }
+}
+```
+
+
 
 ## 递归
 
