@@ -508,10 +508,15 @@ class Solution:
 
 + DP萌新三步：
   + 思考回溯要怎么写
+  
+    + 首先是寻找子问题：在通过某个操作搞掉一小部分后，剩下的一个小一点的区段的处理方法应和原问题解决方法相同
+  
     + 入参和返回值
     + 递归到哪里
     + 递归边界和入口
+  
   + 改成记忆化搜索
+  
   + 1:1翻译成递归
 
 例1.[198. 打家劫舍](https://leetcode.cn/problems/house-robber/):
@@ -571,6 +576,83 @@ for(int i=2;i<n;i++)
 }
 return dp[n-1];
 ```
+
+DP和递归的核心思想不同：递归是从后往前（从顶到底），DP是从前往后（从底到顶）
+
+[1105. 填充书架](https://leetcode.cn/problems/filling-bookcase-shelves/)：
+
++ 这里的子问题为，将几本书放到一层以后，剩下的所有书应该怎样排才能使总height最小（这与原问题结构是相同的）
+
++ 从递归开始
+
+```python
+# 暴力递归，会超时
+class Solution:
+    def minHeightShelves(self, books: List[List[int]], shelf_width: int) -> int:
+        def dfs(i: int) -> int:
+            if i < 0: return 0  # 没有书了，高度是 0
+            res, max_h, left_w = inf, 0, shelf_width
+            for j in range(i, -1, -1):
+                left_w -= books[j][0]
+                if left_w < 0: break  # 空间不足，无法放书
+                max_h = max(max_h, books[j][1])  # 从 j 到 i 的最大高度
+                res = min(res, dfs(j - 1) + max_h)
+            return res
+        return dfs(len(books) - 1)
+```
+
++ 翻译成递推：
+
+  dp[i+1]表示到物品下标为i的最小书架高度
+
+  这里状态转移方程有点特殊，遍历到物品i时，考虑将i与它前面的几件物品放到最后一层（直到这一层放不下为止），那么更新dp[i+1]为这一层物品的高度height+这些物品前面所有物品的高度最小值dp[j]
+
+```python
+class Solution:
+    def minHeightShelves(self, books: List[List[int]], shelf_width: int) -> int:
+        n = len(books)
+        f = [0] + [inf] * n  # 在前面插入一个状态表示 dfs(-1)=0
+        for i in range(n):
+            max_h, left_w = 0, shelf_width
+            for j in range(i, -1, -1):
+                left_w -= books[j][0]
+                if left_w < 0: break  # 空间不足，无法放书
+                max_h = max(max_h, books[j][1])  # 从 j 到 i 的最大高度
+                f[i + 1] = min(f[i + 1], f[j] + max_h)
+        return f[n]  # 翻译自 dfs(n-1)
+```
+
++ 自己写法：
+
+```c++
+class Solution {
+public:
+    int minHeightShelves(vector<vector<int>>& books, int shelfWidth) {
+        int n=books.size();
+        vector<int> dp(n+1,1000000);
+        dp[0]=0;
+        for(int i=0;i<n;i++)
+        {
+            int cur_width=shelfWidth-books[i][0];
+            int height=books[i][1];
+            dp[i+1]=dp[i]+height;
+            for(int j=i-1;j>=0;j--)
+            {
+                if(books[j][0]>cur_width)
+                {
+                    break;
+                }
+                cur_width-=books[j][0];
+                height=max(height,books[j][1]);
+                dp[i+1]=min(dp[i+1],dp[j]+height);
+            }
+        }
+        return dp[n];
+    }
+};
+```
+
+<mark>通过此题，可以明白，dp[i]可以表示的含义不止有**“选了第i个”**（如上面一题），还可以有**“以第i个为某层结束”**等含义</mark>
 
 ### 背包DP：”选与不选“思想的代表
 
@@ -658,6 +740,10 @@ dp[i][c]=max(dp[i-1][c],dp[i][c-w[i]]+v[i]);
 
 # ##########<mark>(待施工)</mark>##########
 
+### 子序列问题
+
+[1027. 最长等差数列](https://leetcode.cn/problems/longest-arithmetic-subsequence/)：
+
 ## 动态规划题目积累：
 
 [1125. 最小的必要团队](https://leetcode.cn/problems/smallest-sufficient-team/):
@@ -682,6 +768,26 @@ dp[i][c]=max(dp[i-1][c],dp[i][c-w[i]]+v[i]);
 
 [200. 岛屿数量](https://leetcode.cn/problems/number-of-islands/)：同理，只不过这里用数组表示节点。**将已经遍历过的地点换一个数（比如-1）**，就不需要再遍历了
 
+### 有向图找环
+
+[802. 找到最终的安全状态](https://leetcode.cn/problems/find-eventual-safe-states/)：
+
++ 方法1：三色法，将没被遍历过的节点设为0（白色），不安全的（在环上的）或在递归栈中的节点设为1（灰色），已经确认安全的节点为黑色。那么从一个节点开始DFS，把路径标为灰色，碰到灰色则此DFS路径不安全，碰到黑色则安全。那么一个节点的安全与否可以转化为多个子问题：它所有的出边指向的节点是否安全？
+
+```python
+dfs(i):
+    if color[i]==1:
+        return False
+    elif color[i]==2:
+        return True # 这几行是边界条件，即该节点已经被遍历过
+    color[i]=1      # 若该节点之前没被遍历，现在遍历到了，染灰
+    for j in graph[i]:
+        if dfs(j) == False:
+            return False # 找到一条路不安全
+    color[i]=2 # 所有路都安全，记得把这个节点的颜色改掉
+    return True
+```
+
 ## 并查集
 
 + 大致思路：将一个大集合分堆，用一个链表指明某个头元素的根节点在哪里，根节点相同的元素属于同一堆
@@ -695,3 +801,5 @@ dp[i][c]=max(dp[i-1][c],dp[i][c-w[i]]+v[i]);
 （周赛332）[6356. 子字符串异或查询](https://leetcode.cn/problems/substring-xor-queries/)：暴力把字符串能表示的所有二进制数（答案能取到的）全放进容器里，然后无脑查找
 
 [56. 合并区间](https://leetcode.cn/problems/merge-intervals/)：
+
+[1163. 按字典序排在最后的子串](https://leetcode.cn/problems/last-substring-in-lexicographical-order/)：字典序最大的子串结尾一定在原字符串末尾
