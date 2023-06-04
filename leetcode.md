@@ -241,13 +241,26 @@ public:
 
 认为更自然：正常声明left、right，若[mid]>[left]，则left=mid+1，否则right=mid
 
+### 二分答案
 
++ <mark>如果题目中有「最大化最小值」或者「最小化最大值」，一般都是二分答案</mark>
+
+[2517. 礼盒的最大甜蜜度](https://leetcode.cn/problems/maximum-tastiness-of-candy-basket/):**（最大化最小值）**排序后（显然要排序），首先确定答案的范围一定是在(0, $$\frac{price.back()-price[0]}{k-1}+1$$)之间（即均匀选择每一个礼物），然后在这个区间里通过二分“寻找”答案。
+
+然后在这个范围内进行二分，对于每次算出的mid都可以看比预期答案大/小，直到没有可二分的为止，即找到答案。
+
+[875. 爱吃香蕉的珂珂](https://leetcode.cn/problems/koko-eating-bananas/):**限制总时长求最小速度（最小化最大值）**
+
+注意这里二分的left和right不要搞反了，这里$$(总香蕉根数/速度)$$是可能实现答案的最小值，最大值应为10<sup>9</sup>.
+
+**思路不难，但有细节问题：**
+
+1. 注意speed不要有0的可能，带进函数会出错（这就对于二分的left设定有标准了，在left侧为闭区间的情况下，left不能为0）
+2. <mark>边界条件（本题为left）一定要想明白开/闭区间</mark>，想清楚能不能取到（本题有一个样例为piles=[2,2], h=2, 若left取total/h且为开区间就会出事）
 
 ## 三个数运算暴力枚举的优化
 
 [982. 按位与为零的三元组](https://leetcode.cn/problems/triples-with-bitwise-and-equal-to-zero/)：先将两个数按位与的值存在一个容器中，再第三个数与这个容器中所有数运算
-
-
 
 ## 状态压缩：
 
@@ -760,7 +773,66 @@ dp[i][c]=max(dp[i-1][c],dp[i][c-w[i]]+v[i]);
 
 一般不需要使用过于复杂的数据结构，开二维数组就行
 
-## 图DFS
+## DFS
+
+### 二叉树DFS模板：
+
++ 迭代：
+
+```c++
+初始化栈；
+while(栈非空||结点非空)
+{
+    while(结点非空)
+    {
+        stk.push(head);
+        head=head->left;
+    }
+    head=stk.top();
+    stk.pop();
+    head=head->right;
+}
+//此方法可以将所有节点过一遍
+//在合适的位置进行适当操作
+```
+
++ 递归：
+
+```c++
+void dfs(tree*node)
+{
+    /**************/
+    if(node==NULL)
+    {
+        return;
+    }
+    /**************/
+    dfs(tree->left);
+    dfs(tree->right);
+}
+```
+
+### 图DFS模板：
+
++ 递归：
+
+```c++
+vector<vector<int>> map;//map[i]中装了所有i节点的下一个节点
+vector<int> vis;//存储是否被遍历过，vis[i]==0——遍历过；vis[i]==1——没遍历过
+void dfs(int cur)
+{
+    for(int next:map[cur])
+    {
+        if(!vis[next])
+        {
+            //do something
+            dfs(next);
+        }
+    }
+}
+```
+
+
 
 ### 连通集个数：
 
@@ -787,6 +859,16 @@ dfs(i):
     color[i]=2 # 所有路都安全，记得把这个节点的颜色改掉
     return True
 ```
+
+## BFS：
+
+<mark>这最好别拿递归实现！就用队列！</mark>
+
+递归虽然可以参数加一个depth，但实际运行还是一个枝一个枝跑的（和DFS一样），有些情况会出问题，如下面这道题：
+
+[1031. 两个非重叠子数组的最大和](https://leetcode.cn/problems/maximum-sum-of-two-non-overlapping-subarrays/)：
+
+注意一个细节，最短路径一定先被BFS到（用队列写法写的话，会先把同一深度的节点BFS完）
 
 ## 并查集
 

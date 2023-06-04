@@ -73,8 +73,12 @@ sort(nums.begin(),nums.end());//nums为vector类型，默认升序排序
 ```c++
 unordered_set<int> uset;
 uset.insert(x);
+uset.erase(x);//删去元素
 uset.find(x);//找到返回迭代器，否则返回uset.end()
+uset.count(x);//返回x的数目，0或者1
 uset.size();//返回元素个数
+uset.clear();//清空
+uset.empty();//空返回1
 ```
 
 ## 7.pair
@@ -112,9 +116,20 @@ deq.back(); //返回末尾元素
 deq.front(); //返回开始元素
 ```
 
+## 9.自定义排序
 
-
-
+```c++
+vector<string> store;
+store.push_back("aaa");
+store.push_back("aaaa");
+store.push_back("aa");
+sort(store.begin(),store.end(),cmp);
+bool cmp(string left, string right)
+{
+    return left.length() < right.length(); //按长度从小到大排列
+}
+注意：如果cmp为类内函数必须加static修饰
+```
 
 # 一些函数
 
