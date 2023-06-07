@@ -10,6 +10,8 @@
 
 例：[Q2530执行 K 次操作后的最大分数](https://leetcode.cn/problems/maximal-score-after-applying-k-operations/)、[414. 第三大的数](https://leetcode.cn/problems/third-maximum-number/)（也可以算）
 
+# 题型合集
+
 ## 同向双指针&滑动窗口
 
 + 双指针：涉及连续子数组（e.g.最长的不出现重复字母的子串）
@@ -767,6 +769,30 @@ dp[i][c]=max(dp[i-1][c],dp[i][c-w[i]]+v[i]);
 
 以此开始动态规划，dp[i]表示职业技能为i（一个二进制数，表示现已有的状态）所需的最少人数的情况的所有人的集合
 
+[10. 正则表达式匹配](https://leetcode.cn/problems/regular-expression-matching/):
+
+构造状态、状态转移方程的方式比较特殊，属于非套路型题
+
++ dp\[i][j]表示s的前i位与p的前j位能否正则匹配，能为true，不能为false.为了便于dp，这里将s、p数组的第一位加一个空位（即所有字母往后移动一位）此时p[0]和s[0]想象为空，而后面每一位p[i]即是原来的p[i-1]，s一样
+
++ 首先将dp\[0][i]以及dp\[i][0]的所有值初始化好（这个表示第一位空字符是否配对）
+
++ i、j从1开始的状态转移方程：第一重循环i为枚举的每一个字母，第二重循环为遍历p的每一个字母。
+
+  + 遍历到(i,j)位时，若s[i]能与p[j]配对（即字母相同或有'.'），则dp\[i][j]=dp\[i-1][j-1]
+
+  + 若p[i]=='*'，则考虑两种情况：
+
+    1. dp\[i][j-2]==true，即p[j-1]和p[j]两位可以不用直接去掉，dp\[i][j]=true
+
+    2. p[j]能与s[i]配对（p[j]为'.'或与s[i]相同），则dp\[i][j]=dp\[i-1][j]（具体逻辑为：字母+'*'的组合相比于遍历到i-1又重复了一次，故为true）
+
+  + 如此遍历即可
+
++ 答案为dp\[s.length][p.length]
+
+**视频：**[视频图解 动态规划 正则表达式 - 正则表达式匹配 - 力扣（LeetCode）](https://leetcode.cn/problems/regular-expression-matching/solution/shi-pin-tu-jie-dong-tai-gui-hua-zheng-ze-biao-da-s/)
+
 ## 图
 
 ### 建图：
@@ -859,6 +885,10 @@ dfs(i):
     color[i]=2 # 所有路都安全，记得把这个节点的颜色改掉
     return True
 ```
+
+### Tarjan算法：
+
+
 
 ## BFS：
 
