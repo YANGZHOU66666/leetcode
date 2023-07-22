@@ -759,6 +759,123 @@ dp[i][c]=max(dp[i-1][c],dp[i][c-w[i]]+v[i]);
 
 [1027. 最长等差数列](https://leetcode.cn/problems/longest-arithmetic-subsequence/)：
 
+### 区间DP
+
+区间DP和线性DP的区别：线性DP在前缀/后缀上转移；区间DP从小区间转移到大区间
+
+**母题：**[516. 最长回文子序列](https://leetcode.cn/problems/longest-palindromic-subsequence/)
+
+状态的设计：用二维的空间表示一段数组，分别存储头和尾，dp\[i][j]表示数组[i,j]区间内的最长回文子序列长度
+
+状态转移方程：
+
+```c++
+if(s[i]==s[j]){
+	dp[i][j]=dp[i+1][j-1];//若s[i]和s[j]相等，必然两个都要取啊
+}
+else{
+	dp[i][j]=max(dp[i][j-1],dp[i+1][j])//若s[i]和s[j]不相等，那么这两者只能取一个
+}
+```
+
+<div style="color:red">注意枚举顺序！</div>
+<mark>注意到，这里更新dp[i]需要dp[i+1]的值，故i只能倒序枚举；更新dp\[][j]需要dp\[][j-1]，故j需要正序枚举</mark>
+
+代码：
+
+```javascript
+var longestPalindromeSubseq = function(s) {
+    let n=s.length;
+    let dp=[];
+    for(let i=0;i<n;i++){
+        dp[i]=[];
+        for(let j=0;j<n;j++){
+            dp[i][j]=0;
+        }
+    }
+    
+    for(let i=n-1;i>=0;i--){
+        dp[i][i]=1;
+        for(let j=i+1;j<n;j++){
+            if(s[i]==s[j]){
+                dp[i][j]=dp[i+1][j-1]+2;
+            }else{
+                dp[i][j]=Math.max(dp[i+1][j],dp[i][j-1]);
+            }
+        }
+    }
+    return dp[0][n-1];
+};
+```
+
+**引申题：**[1039. 多边形三角剖分的最低得分](https://leetcode.cn/problems/minimum-score-triangulation-of-polygon/)
+
+状态的设计：dp\[i][j]表示从i到j这些顶点组成的多边形剖分的最低得分
+
+状态转移方程：遍历i到j之间的每一个节点k，将多边形划分为(i,j,k)组成的三角形+两侧的多边形。
+
+```c++
+dp[i][j]=INT_MAX;
+for(int k=i+1;k<j;k++){
+    dp[i][j]=min(dp[i][j],dp[i][k]+dp[k][j]+values[i]*values[k]*values[j]);
+}
+```
+
+注意到每次更新dp\[i][j]时需要用到dp\[i][k]和dp\[k][j]，其中i<k<j，故i需要从后向前枚举，j需要从前往后枚举
+
+### 状态机DP(以股票问题为代表)
+
+[122. 买卖股票的最佳时机 II](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii/)：（模板题）
+
++ 对于状态[i, hold]表示遍历完前i天且第i天是否持有股票的最大利润
++ 这里直接认为买到的股票是亏钱（如手上持有5块钱的股票认为亏5块钱）
++ 若i<0则达到递归出口，由于一天都没有故利润为0.这里对于[-1, True]是不合法的，直接定义为-inf
+
+```python
+# 递归写法：
+@cache
+dfs(i, hold):
+    if i < 0:
+        return -inf if hold else 0 #若第-1天还hold则不合法
+    if hold:
+        return max(dfs(i-1, True), dfs(i-1, False) + prices[i])
+    else:
+        return max(dfs(i-1),True + prices[i], dfs(i-1, False))
+
+# 迭代写法：
+n = len(prices)
+dp = [[0,0] for i in range(n+1)]
+dp[0][0] = 0
+dp[0][1] = -inf
+for i in range(1,n+1):
+    dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i-=])
+    dp[i][1] = max(dp[i-1][1], dp[i-1][0] - prices[i-1])
+```
+
++ 股票问题的通用解法：
+
+```c++
+dp[i][k][0] //第i天 还可以交易k次 手中没有股票
+dp[i][k][1] //第i天 还可以交易k次 手中有股票
+```
+
+```c++
+dp[i][k][0] = max(dp[i-1][k][0],dp[i-1][k][1]+prices[i])
+//今天没有持有股票，等于昨天没有持有股票今天不动和昨天持有股票今天卖了的最大值
+dp[i][k][1] = max(dp[i-1][k][1],dp[i-1][k-1][0]-prices[i])
+//今天持有股票，等于昨天持有股票今天不动和昨天没持有今天买了的最大值
+    
+//这里可以开两个二维数组而非三维数组
+```
+
+[188. 买卖股票的最佳时机 IV](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-iv/)：（含最多售卖次数的）
+
+其他没什么太多可提，上面思路会了就会了。<mark>注意初始化dp\[0]\[j]\[0]和dp\[0]\[j]\[1](j>0)为无穷小（因为不可能实现）</mark>
+
+### 换根DP
+
+[834. 树中距离之和](https://leetcode.cn/problems/sum-of-distances-in-tree/)
+
 ## 动态规划题目积累：
 
 [1125. 最小的必要团队](https://leetcode.cn/problems/smallest-sufficient-team/):
@@ -888,6 +1005,8 @@ dfs(i):
 
 ### Tarjan算法：
 
+# #########（待施工）##########
+
 
 
 ## BFS：
@@ -908,6 +1027,12 @@ dfs(i):
 
 # ##########(待施工)##########
 
+## 状态机
+
+### ######## 待施工 ########
+
+[8. 字符串转换整数 (atoi)](https://leetcode.cn/problems/string-to-integer-atoi/)
+
 ## 思路特殊的题目积累：
 
 （周赛332）[6356. 子字符串异或查询](https://leetcode.cn/problems/substring-xor-queries/)：暴力把字符串能表示的所有二进制数（答案能取到的）全放进容器里，然后无脑查找
@@ -915,3 +1040,13 @@ dfs(i):
 [56. 合并区间](https://leetcode.cn/problems/merge-intervals/)：
 
 [1163. 按字典序排在最后的子串](https://leetcode.cn/problems/last-substring-in-lexicographical-order/)：字典序最大的子串结尾一定在原字符串末尾
+
+[979. 在二叉树中分配硬币](https://leetcode.cn/problems/distribute-coins-in-binary-tree/)：DFS，注意答案是每棵子树的硬币树和节点数之差绝对值的和
+
+# 常见约束（C++版）
+
+1.爆int（注意两个int相加再赋值给long long也会爆，需要先强制类型转换）
+
+2.数组越界，判断条件里加
+
+3.数组长度很短的时候需要先在最开始return一下结果

@@ -21,8 +21,6 @@ Swaroop was 20 years old when he wrote this book
 Why is Swaroop playing with that python?
 ```
 
-
-
 same effect:
 
 ```python
@@ -108,7 +106,7 @@ input more than one integer:
 
 ```python
 a, b = map(int, input().split())
-a, b, c = map(int,input().split())
+a, b, c = map(int, input().split())
 ```
 
 input many strs into a list:
@@ -320,7 +318,7 @@ tinydict = {'name': 'runoob','code':1, 'site': 'www.runoob.com'}
 
 ```c++
 unordered_map<int,int> a
-    a[10]+=1 //valid
+    a[10]+=1 //In C++ this is valid
 ```
 
 ```python
@@ -488,6 +486,13 @@ f.close()
 
 
 ## 常用方法积累
+
+#### 倒序for循环
+
+```python
+for i in range(n-1,-1,-1)
+#第一个参数是起始数，第二个是终止数（不包含），第三个-1表示倒序
+```
 
 #### enumerate：返回一个enumerate对象，多用于在for循环中进行计数
 

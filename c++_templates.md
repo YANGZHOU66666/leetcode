@@ -11,12 +11,20 @@ v.push_back(num);//向容器末尾插入元素num
 v.pop_back();//清除容器末尾的元素
 v.back()//返回容器v最后一个元素
 v.resize(n)//将v内部的元素个数改为n个，多出的删去，少的补（默认补0），本来就有且不超出的部分保留
-v.resize(n,num)//补的部分补num，其余同上
+v.resize(n,num)//补的部分补numv，其余同上
 v.empty()//是空则返回true
+v.clear()//清空所有值
+v.size()//v中的元素个数
+v.capacity()//v占据的内存（注意和size()的区别）
 //声明二维数组：
-    vector<vector<int>> v(n,vector<int>(m));
-在类的private中声明vector类型并初始化：
-    vector<int> v=vector<int>(5,5);
+vector<vector<int>> v(n,vector<int>(m));
+//在类的private中声明vector类型并初始化：
+vector<int> v=vector<int>(5,5);
+//迭代器的使用：
+vector<int>::iterator it=v.begin();
+it++;//迭代器向后移动一位
+it<v.end();//判断结束
+*it=10;//赋值给相对应迭代器的位置
 ```
 
 ##  2.unordered_map
