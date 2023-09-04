@@ -12,9 +12,197 @@
 
 # 题型合集
 
-## 同向双指针&滑动窗口
+## 排序
 
-+ 双指针：涉及连续子数组（e.g.最长的不出现重复字母的子串）
+### 快速排序
+
++ 将整个数组中的元素大致分成几类
+
++ 核心思想是<mark>用一个指针遍历整个数组，再在需要填入数字的地方再做一个指针</mark>
+
+将数组分成两类：
+
+```c++
+//假设数组nums中0和1交错排布，现在需要将0放在左边，1放在右边
+int left = 0;//标记
+for(int i=0;i<nums.size();i++){
+    if(nums[i]==0){
+        swap(nums[i],nums[left]);//需要注意这里交换完之后nums[i]是否需要再换一次（这里是不需要的—）。因为这段代码执行完之后i向右移了一位，有可能这里的nums[i]在后面处理不到了导致问题。
+        left++;
+    }
+}
+```
+
+将数组分成三段：[75. 颜色分类](https://leetcode.cn/problems/sort-colors/)
+
+这里需要开两个指针用于标记下一个元素应该放的位置，再用一个指针遍历整个数组
+
+```c++
+var sortColors = function(nums) {
+    let n=nums.length;
+    let left=0;
+    let right=n-1;
+    let i=0;
+    while(i<=right){
+        if(nums[i]==0){
+            nums[i]=nums[left];
+            nums[left]=0;
+            left++;
+        }else if(nums[i]==2){
+                nums[i]=nums[right//注意到这里nums[right]->nums[i]的过程可能将一个2或0赋给了nums[i]，故还需要重新操作一遍这个i（后面的continue），不i++
+                nums[right]=2;
+                right--;
+                continue;
+            }
+        
+        i++;
+    }
+    return nums;
+};
+```
+
+## 面向链表的模拟题（迭代、递归）
+
++ 主要有迭代和递归两种写法，根据情况选择具体写法，貌似没有特别能笼盖所有情况的结论。以下举几个链表题的例子：
+
+[203. 移除链表元素](https://leetcode.cn/problems/remove-linked-list-elements/)：
+
++ **递归写法：**
+
+  递归的核心思想是将问题转化为子问题。对这道题，大问题为返回原链表删除所有值符合的节点后的结果，这个问题可以拆解为：对该大链表的头节点+后面的少一个节点的链表，若头节点==val，那么直接返回后面链表的处理结果；若头节点!=val，返回头节点->后面链表的处理结果。边界条件为对长度为1的链表直接返回它本身
+
+  ```c++
+  ListNode* removeElements(ListNode* head, int val) {
+      if(head==NULL){
+          return head;
+      }
+      head->next=removeElements(head->next, val);
+      return head->val==val ? head : head->next;
+  }
+  ```
+
++ <mark>警告：每次调用递归的函数时候尽可能想一下只调一次，不要调两次！</mark>
+
+  这里又差点这么写：
+
+  ```c++
+  // Incorrect answer
+  ListNode* removeElements(ListNode* head, int val) {
+      if(head==NULL){
+          return head;
+      }
+      if(head->val==val){
+          return removeElements(head->next, val);
+      }else{
+          head->next=removeElements(head->next, val);
+          return head;//这样写调用了两次removeElements，浪费了很多
+      }
+  }
+  ```
+
++ **迭代写法：**
+
+  对于这道题来说不难，只要用一个travel节点遍历整条链表，把node->next->val==val的节点的next全部变为下一个节点的next即可
+
+  注意到**头节点可能被删除，因此需要新建一个dummyHead哑节点**
+
+  ```c++
+  //这里直接抄官方题解了
+      ListNode* removeElements(ListNode* head, int val) {
+          struct ListNode* dummyHead = new ListNode(0, head);//健一个哑节点，防止头节点丢失
+          struct ListNode* temp = dummyHead;
+          while (temp->next != NULL) {
+              if (temp->next->val == val) {
+                  //若下一个节点应该删除，则直接指向下下个节点。注意下下个节点也可能被删除，故temp不移动到temp->next
+                  temp->next = temp->next->next;
+              } else {
+                  temp = temp->next;
+              }
+          }
+          return dummyHead->next;
+      }
+  ```
+
+[206. 反转链表](https://leetcode.cn/problems/reverse-linked-list/)：
+
++ **递归写法：**对于大链表的子链表head->next，子链表反转之后，头节点应该插到反转后的子链表结尾。这里的写法是先存储一下temp=head->next（翻转之后该节点地址不会变化），然后temp变成了链表结尾，temp->next=head
+
+  ```c++
+      ListNode* reverseList(ListNode* head) {
+          if (!head || !head->next) {
+              return head;
+          }
+          ListNode* newHead = reverseList(head->next);
+          head->next->next = head;
+          head->next = nullptr;
+          return newHead;
+      }
+  ```
+
++ **迭代写法：**注意这里一个很容易的迭代写法是把所有节点压进栈里，然后一个个取出并连起来。但是这种方法空间为o(n)，我们应当找到空间复杂度为o(1)的写法
+
+  迭代与递归的主要差别是迭代从头到尾，递归从尾到头。这里我们应该用节点cur表示正在遍历的节点，用prev表示节点前面已经翻转好了的链表头，next表示cur后面还未被遍历到的链表的头。
+
+  ```c++
+  ListNode* reverseList(ListNode* head) {
+      if(head==NULL||head->next==NULL){
+          return head;
+      }
+      ListNode*cur=head;
+      ListNode*prev=NULL;
+      ListNode*next=NULL;
+      while(cur!=NULL){
+          next=cur->next;
+          cur->next=prev;
+          prev=cur;
+          cur=next;
+      }
+      return prev;
+  }
+  ```
+
+### 判断环形链表
+
++ 哈希表法（略）
+
++ 双指针法（快慢指针）
+
+  对于要返回循环起点的题目[142. 环形链表 II](https://leetcode.cn/problems/linked-list-cycle-ii/)，由官方题解，<mark>注意到从头节点head到循环起点的距离是快慢指针相遇的点到循环起点的距离</mark>（具体证明过程略），故可再初始化一个ans节点从head开始走，直到与慢指针相遇。代码如下：
+
+  ```javascript
+  var detectCycle = function(head) {
+      let slow=head;
+      let fast=head;
+      while(fast!=null){
+          slow=slow.next;
+          fast=fast.next;
+          if(fast==null){
+              return null;
+          }
+          fast=fast.next;
+          if(slow==fast){
+              let ans=head;
+              while(ans!=slow){
+                  ans=ans.next;
+                  slow=slow.next
+              }
+              return ans;
+          }
+  
+      }
+      return null;
+  };
+  ```
+
+  
+
+## 双指针
+
++ 双指针：涉及连续子数组时需要想到（e.g.最长的不出现重复字母的子串）
+
+### 同向双指针&滑动窗口
+
+此类题特点：有**连续子数组**，且这个子数组的增长/减少一定会带来不利的影响，满足“只要[l,r]不满足某个要求，那么[l+1，r]也不满足/[l,r+1]也不满足”**(也即一定“单调性”)**
 
 [1658. 将 x 减到 0 的最小操作数](https://leetcode.cn/problems/minimum-operations-to-reduce-x-to-zero/)反向思维可知题目要数组中某个连续子序列为定值
 
@@ -28,7 +216,7 @@
 
 [2379. 得到 K 个黑块的最少涂色次数](https://leetcode.cn/problems/minimum-recolors-to-get-k-consecutive-black-blocks/)
 
-## 相向双指针：
+### 相向双指针：
 
 + 有顺序（或先行排序）
 
@@ -58,7 +246,7 @@ P.S.本题另一个小细节：防止重复三元组的出现，三个指针每�
 
 + 前缀和的功用：
 
-  将**字符串子串的运算（求和等）转化成两点之间的运算**，进而下一步处理<a href="#hash1">一个与哈希表结合的方法见下</a>.
+  将**<mark>字符串子串的运算（求和等）转化成两点之间的运算</mark>**，进而下一步处理<a href="#hash1">一个与哈希表结合的方法见下</a>.
 
 + 思路有点像前缀和的一题：[1139. 最大的以 1 为边界的正方形](https://leetcode.cn/problems/largest-1-bordered-square/)：算每个点的左、上连续1的个数
 
@@ -231,6 +419,8 @@ public:
 
 ## 二分
 
+### 原生二分：
+
 + 题目特点：数组部分升降序/完全升降序，找一个特定需求的值
 
 + 核心思想：红蓝染色，先找一个点，然后确定目标值在左侧/右侧，目标值不在的那一侧染色(目标值左点红色，目标值及其右点染成蓝色)
@@ -243,7 +433,11 @@ public:
 
 认为更自然：正常声明left、right，若[mid]>[left]，则left=mid+1，否则right=mid
 
-### 二分答案
+### 原生二分的进阶：
+
+
+
+### 二分答案：
 
 + <mark>如果题目中有「最大化最小值」或者「最小化最大值」，一般都是二分答案</mark>
 
@@ -310,6 +504,21 @@ double myPow(double x, int n) {
     {
         return 1.0/cal(x,-N);
     }
+}
+```
+
+### 快速乘：与快速幂接近
+
+```C++
+int quick_add(int x,int y){//return x*y
+    int res=0;
+    while(x){
+        if(x&1){
+          res+=y;  
+        }
+        x>>1;
+    }
+    return res;
 }
 ```
 
@@ -910,6 +1119,10 @@ dp[i][k][1] = max(dp[i-1][k][1],dp[i-1][k-1][0]-prices[i])
 
 **视频：**[视频图解 动态规划 正则表达式 - 正则表达式匹配 - 力扣（LeetCode）](https://leetcode.cn/problems/regular-expression-matching/solution/shi-pin-tu-jie-dong-tai-gui-hua-zheng-ze-biao-da-s/)
 
+[1388. 3n 块披萨](https://leetcode.cn/problems/pizza-with-3n-slices/)：
+
+注意到可以转化为环形数组不相邻选n个数，后面和打家劫舍接近，略。
+
 ## 图
 
 ### 建图：
@@ -1019,6 +1232,88 @@ dfs(i):
 
 注意一个细节，最短路径一定先被BFS到（用队列写法写的话，会先把同一深度的节点BFS完）
 
+## 还原二叉树
+
+[106. 从中序与后序遍历序列构造二叉树](https://leetcode.cn/problems/construct-binary-tree-from-inorder-and-postorder-traversal/):
+
+题目给出了中序和后序遍历。注意到后序遍历的顺序是“左->右->根”，那么如果倒序遍历后序遍历数组postorder，得到的顺序是“根->右->左”，这个从根节点出发的顺序才是我们更希望看到的（显然，我们构造这棵树需要从根节点逐步往下递归来写）。但这时我们无法确定后序遍历的倒序从哪里开始“拐弯”，即“根->右”转为“右->左”（换一种理解，无法确定哪里的儿子是NULL）。这时需要用中序遍历来规约某一棵子树的“范围”。若后序遍历倒序枚举到一个节点，这个节点在中序遍历的右侧已经没有节点可枚举了，那么说明这个节点已经处于这颗子树的最右侧，应该向左拐弯了。
+
+补充一句：（个人看法）这道题整体是跟着后序遍历的倒序枚举在画这棵树，然后用中序遍历来约束这棵树哪里的枝条被阻拦（NULL）
+
+```c++
+class Solution {
+    int post_pointer;
+    unordered_map<int,int> reflect;
+public:
+    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
+        int n=inorder.size();
+        post_pointer=n-1;
+        for(int i=0;i<n;i++){
+            reflect[inorder[i]]=i;
+        }
+        return helper(0,n-1,inorder,postorder);
+    }
+    TreeNode* helper(int left,int right,vector<int>& inorder, vector<int>& postorder){
+        if(right<left){
+            return NULL;
+        }
+        int node_val=postorder[post_pointer];
+        int index=reflect[node_val];
+        TreeNode* root=new TreeNode(node_val);
+        post_pointer--;
+        root->right=helper(index+1,right,inorder,postorder);
+        root->left=helper(left,index-1,inorder,postorder);
+        return root;
+    }
+};
+```
+
+[449. 序列化和反序列化二叉搜索树](https://leetcode.cn/problems/serialize-and-deserialize-bst/): 和上一题接近，不同点在于这题是二叉搜索树，根据节点值即可确定下一个节点到底“拐”不“拐”弯。
+
+```java
+public class Codec {
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        List<Integer> list=new ArrayList<Integer>();
+        postOrder(root,list);
+        String str=list.toString();
+        return str.substring(1,str.length()-1);
+    }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        if(data.isEmpty()){
+            return null;
+        }
+        String[] arr=data.split(", ");
+        Deque<Integer> stack=new ArrayDeque<Integer>();
+        int length=arr.length;
+        for(int i=0;i<length;i++){
+            stack.push(Integer.parseInt(arr[i]));
+        }
+        return construct(Integer.MIN_VALUE, Integer.MAX_VALUE, stack);
+    }
+    public void postOrder(TreeNode root, List<Integer> list){
+        if(root==null){
+            return;
+        }
+        postOrder(root.left, list);
+        postOrder(root.right, list);
+        list.add(root.val);
+    }
+       private TreeNode construct(int lower, int upper, Deque<Integer> stack) {
+        if (stack.isEmpty() || stack.peek() < lower || stack.peek() > upper) {
+            return null;
+        }
+        int val = stack.pop();
+        TreeNode root = new TreeNode(val);
+        root.right = construct(val, upper, stack);
+        root.left = construct(lower, val, stack);
+        return root;
+    }
+}
+```
+
 ## 并查集
 
 + 大致思路：将一个大集合分堆，用一个链表指明某个头元素的根节点在哪里，根节点相同的元素属于同一堆
@@ -1037,7 +1332,7 @@ dfs(i):
 
 （周赛332）[6356. 子字符串异或查询](https://leetcode.cn/problems/substring-xor-queries/)：暴力把字符串能表示的所有二进制数（答案能取到的）全放进容器里，然后无脑查找
 
-[56. 合并区间](https://leetcode.cn/problems/merge-intervals/)：
+[56. 合并区间](https://leetcode.cn/problems/merge-intervals/)：根据左界排序
 
 [1163. 按字典序排在最后的子串](https://leetcode.cn/problems/last-substring-in-lexicographical-order/)：字典序最大的子串结尾一定在原字符串末尾
 

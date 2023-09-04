@@ -45,7 +45,6 @@ for(unordered_map::iterator it = map.begin();it!=map.end();it++){
     int front = it->first;//key
     int end = it->second;//value
 }//（用迭代器进行遍历）
-
 ```
 
 ## 3.priority_queue（优先队列）
@@ -65,7 +64,7 @@ q.size();//返回元素个数
 ## 4.string
 
 ```c++
-stringf str;
+string str;
 str.length();//返回字符串长度
 ```
 
