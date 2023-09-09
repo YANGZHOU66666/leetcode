@@ -43,23 +43,36 @@ users.sort(function(userA, userB){return userA.age - userB.age});
 //总之，自定义函数，然后升序用a-b，降序用b-a
 ```
 
-+ Java:
+#### Java:
 
 ```java
 int[] arr={1,8,9,4,2,4};
-Arrays.sort(arr);//升序排序
+Arrays.sort(arr);//升序排序，用Arrays类内置函数
+```
+
+#### C++:
+
+```c++
+vector<int> arr;
+arr.push_back(2);
+arr.push_back(4);
+arr.push_back(3);
+arr.push_back(7);
+sort(arr.begin(),arr.end());
 ```
 
 
 
 ### 数组基本操作
 
-+ **C++: vector**
+#### C++: vector
 
 ```c++
 vector<int> v;//声明
 vector<int> v(20);//声明，且里面开始即留20个空间,默认初始化为0（及可以直接用v[i]访问）
-vector<int> v(20,5)//默认初始化为20个5
+vector<int> v(20,5);//默认初始化为20个5
+//声明二维数组:
+vector<vector<int>>(n,vector<int>(m,2));//n*m大小二维数组全部填满2
 //
 v.push_back(num);//向容器末尾插入元素num
 v.pop_back();//清除容器末尾的元素
@@ -81,6 +94,44 @@ vector<int>::iterator it=v.begin();
 it++;//迭代器向后移动一位
 it<v.end();//判断结束
 *it=10;//赋值给相对应迭代器的位置
+```
+
+### Java: ArrayList
+
+> Java的List分为ArrayList和LinkedList两种
+
+```java
+List<Integer> arr=new ArrayList<Integer>();
+//开二维数组:
+List<List<Integer>> grid=new ArrayList<List<Integer>>();
+for(int i=0;i<n;i++){
+    grid.add(new ArrayList<Integer>());
+}
+arr.add(3);//将指定元素添加到末尾
+arr.addAll([4,5,6]);//将指定集合的所有元素添加到末尾
+int x=arr.get(i);//返回第i个元素
+
+```
+
+#### Java: 普通数组
+
+#### JavaScript: 普通数组([])
+
+```javascript
+let arr=[];
+for(let i=0;i<n;i++){
+    arr[i]=0;
+}
+//二维数组:
+let grid=[];
+for(let i=0;i<n;i++){
+    grid[i]=[];
+    for(let j=0;j<m;j++){
+        grid[i][j]=0;
+    }
+}
+arr.push(1);//在后端加入
+arr.pop();//后端弹出
 ```
 
 
@@ -152,11 +203,13 @@ for(unordered_map::iterator it = map.begin();it!=map.end();it++){
 Map<Integer, String> hashMap=new HashMap<>();//初始化
 map.put(1,"aaa");//放入键值对
 map.put(2,"bbb");
+map.put(3,"ccc");
 
 map.get(1);//返回键为1的值
 map.remove(1);//删去键为1的键值对
 map.containsKey(2);//检查是否有键为2的键值对
 map.containsValue("bbb");//检查是否有值为"bbb"的键值对
+hashing.replace(3,"cccc");//replace(key,newValue): 更换哈希值
 map.size();//返回键值对的数量
 //遍历1:
 for (Integer key : map.keySet()) {
@@ -184,6 +237,7 @@ hashing.has(2);//true
 hashing.get(3);//"ccc"
 // delete(key): 删除键值对
 hashing.delete(2);
+
 // values(): 返回所有键值对的值组成的一个可迭代对象
 let valueSet=hashing.values();//暂时不知道有什么用
 // entries(): 返回一个新的包含 [key, value] 对的 Iterator 对象，返回的迭代器的迭代顺序与 Map 对象的插入顺序相同
@@ -206,9 +260,11 @@ random.nextInt();//随机返回一个整数，在int范围内
 #### C++: string
 
 ```c++
-string str;
+string str="abcdefgfedcba";
 str.length();//返回字符串长度
-
+int place_d=str.rfind('d');//返回d字符从后往前第一次出现的位置，这里是9
+int place_e=str.rfind('e',9);//返回从下标9往前数e第一次出现的下标，这里是4
+int place_h=str.rfind('h');//找不到的话，返回str.npos
 ```
 
 #### Java: String
@@ -243,6 +299,26 @@ str2.toUpperCase();//转换为大写
 str2.trim();//去除开头结尾的空白
 ```
 
+### PriorityQueue
+
+#### C++: priority_queue
+
+```c++
+priority_queue<int> q;//默认大根堆
+q.push();//插入元素
+q.pop();//弹出元素
+q.top();//返回堆顶元素
+q.empty();//是否为空
+q.size();//返回元素个数
+
+//内部元素优先级设置：
+priority_queue<int> q;//默认大根
+priority_queue<int, vector<int>, less<int> > q;//大根
+priority_queue<double, vector<double>, greater<double>> q;//小根
+```
+
+
+
 ### 字符串和数字转化
 
 #### Java:
@@ -251,5 +327,49 @@ str2.trim();//去除开头结尾的空白
 //Integer.parseInt(String):将字符串转化为数字
 String twentyOneThousand="2100";
 int num=Integer.parseInt(twentyOneThousand);//num==2100
+```
+
+### 数学
+
+Java:
+
+```java
+Math.sqrt(10);//返回double类型的值
+Math.floor(4.8);//向下取整
+Math.ceil(3.2);//向上取整
+Math.round(4.5);//就近取整，优先靠近偶数
+```
+
+JavaScript:
+
+```javascript
+Math.floor(4.8);//向下取整
+Math.ceil(3.2);//向上取整
+Math.round(4.5);//就近取整，优先靠近偶数
+```
+
+### 声明函数内函数
+
+#### C++:
+
+```c++
+int solve(int diameter){
+    auto f=[&](int diameter, string diameter){
+        //do something
+    };
+}
+```
+
+
+
+
+
+### 细节：
+
+#### Java:
+
+```java
+1. i%2不能直接当成判定条件，需为i%2==1(可能是java不能int转boolean?)
+2. 注意int和long必须得用强制类型转换，不能隐式转换
 ```
 

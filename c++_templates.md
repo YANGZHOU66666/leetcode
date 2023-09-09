@@ -58,7 +58,9 @@ q.empty();//是否为空
 q.size();//返回元素个数
 
 //内部元素优先级设置：
-
+priority_queue<int> q;//默认大根
+priority_queue<int, vector<int>, less<int> > q;//大根
+priority_queue<double, vector<double>, greater<double>> q;//小根
 ```
 
 ## 4.string
