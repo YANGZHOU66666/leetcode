@@ -58,7 +58,20 @@ arr.push_back(2);
 arr.push_back(4);
 arr.push_back(3);
 arr.push_back(7);
-sort(arr.begin(),arr.end());
+sort(arr.begin(),arr.end());//默认从小到大排序
+vector<vector<int>> grid;
+grid.push_back([3,2]);
+grid.push_back([5,3]);
+grid.push_back([1,3]);
+sort(grid.begin(),grid.end());//二维数组按照数组元素的第一个数字从小到大排序
+//自定义排序：
+struct cmp{
+    bool operator()(vector<int>& a, vector<int>&b){//这里的两个参数随机应变
+        return a[1]<a[b];//按照a、b数组的第二个元素从小到大排序
+                         //a<b: 从小到大;a>b: 从大到小
+    }
+}
+sort(grid.begin(),grid.end(),cmp());
 ```
 
 
@@ -73,6 +86,7 @@ vector<int> v(20);//声明，且里面开始即留20个空间,默认初始化为
 vector<int> v(20,5);//默认初始化为20个5
 //声明二维数组:
 vector<vector<int>>(n,vector<int>(m,2));//n*m大小二维数组全部填满2
+vector<vector<int>> move={{0,1},{1,0},{0,-1},{-1,0}};//在岛屿类题目中常见
 //
 v.push_back(num);//向容器末尾插入元素num
 v.pop_back();//清除容器末尾的元素
@@ -94,9 +108,11 @@ vector<int>::iterator it=v.begin();
 it++;//迭代器向后移动一位
 it<v.end();//判断结束
 *it=10;//赋值给相对应迭代器的位置
+//返回空数组:
+return vector<int>(0);
 ```
 
-### Java: ArrayList
+#### Java: ArrayList
 
 > Java的List分为ArrayList和LinkedList两种
 
@@ -110,7 +126,8 @@ for(int i=0;i<n;i++){
 arr.add(3);//将指定元素添加到末尾
 arr.addAll([4,5,6]);//将指定集合的所有元素添加到末尾
 int x=arr.get(i);//返回第i个元素
-
+arr.set(2,5);//将下标为2的位置设置为5
+arr.remove(arr.size()-1);//将下标为arr.size()-1的位置的元素删除
 ```
 
 #### Java: 普通数组
@@ -134,18 +151,22 @@ arr.push(1);//在后端加入
 arr.pop();//后端弹出
 ```
 
-
-
 ### 数组复制：
 
 JavaScript和Python直接数组赋/将数组放入数组中时，由于二者公用一个地址空间存储，修改一个的过程中会改另一个。这时候需要新复制一块空间存储相同元素
 
+#### Python:
+
 ```python
-arr.copy()
+arr.copy();
 ```
 
+#### JavaScript:
+
 ```javascript
-arr.concat()
+arr.concat();
+//else:
+arr.slice();
 ```
 
 ### 栈（Stack）
@@ -171,6 +192,75 @@ stk.pop();
 ```
 
 ### 双端队列（Deque）
+
+
+
+### 队列（Queue）
+
+#### Java: LinkedList
+
+```java
+Queue<Integer> que=new LinkedList<Integer>();
+que.offer(1);//入列
+que.offer(2);
+que.offer(3);
+que.offer(4);
+que.poll();//返回第一个元素并删除
+que.element();//返回第一个元素
+que.peek();//返回第一个元素
+que.isEmpty();//返回是否为空
+```
+
+#### JavaScript: 数组可以当作队列来用
+
+```javascript
+let que=[];
+que.push(1);//向末端添加元素
+que.push(2);
+que.push(3);
+que.unshift(0);//向首端添加元素
+que[0];//访问首部元素
+que.shift();//弹出首部元素并返回首部元素
+que.pop();//弹出尾部元素
+que.length==0//判断是否为空
+```
+
+#### C++:
+
+```c++
+queue<tuple<int,int,int>> que;
+que.emplace(1,2,3);
+que.emplace(3,2,5);
+auto [a,b,c]=que.front();
+```
+
+
+
+### 集合（Set）
+
+#### C++: unordered_set
+
+```c++
+unordered_set<int> uset;
+uset.insert(x);
+uset.erase(x);//删去元素
+uset.find(x);//找到返回迭代器，否则返回uset.end()
+uset.count(x);//返回x的数目，0或者1
+uset.size();//返回元素个数
+uset.clear();//清空
+uset.empty();//空返回1
+//遍历：
+unordered_set<int> set = {9,5,9,8,1,2,3,5,6,1,2,3,4,5,6,7,4,3,3};
+        for(unordered_set<int>::iterator it = set.begin();it!=set.end();it++)
+                cout<<*it<<" ";
+```
+
+### JavaScript: Set
+
+```javascript
+let set=new Set();
+
+```
 
 
 
@@ -245,6 +335,21 @@ let entry=hashing.entries();//暂时不知道有什么用
 // clear():
 hashing.clear();//将Map清空
 ```
+
+#### Python: dict
+
+```python
+dic={1:"a",2:"bb",3:"ccc"} # 初始化
+for key, value in dic.items(): # 遍历整个字典
+    # do something
+dic[3]="cccc" # 修改字典值
+dic[4]="dddd" # 增加字典值
+del dic[3] # 删除键值对
+dic.clear() # 清空字典
+
+```
+
+
 
 ### 其他
 
@@ -371,5 +476,13 @@ int solve(int diameter){
 ```java
 1. i%2不能直接当成判定条件，需为i%2==1(可能是java不能int转boolean?)
 2. 注意int和long必须得用强制类型转换，不能隐式转换
+```
+
+### 其他：
+
+#### C++:
+
+```c++
+
 ```
 

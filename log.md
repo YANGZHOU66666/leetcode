@@ -112,3 +112,32 @@ class Solution {
 
 [1031. 两个非重叠子数组的最大和](https://leetcode.cn/problems/maximum-sum-of-two-non-overlapping-subarrays/)：一道有趣的DP+前缀和题目，写到O(n)的时间复杂度并不容易
 
+### 2023.9.10
+
+百度之星看了两道题，题解思路自然，但是明显比力扣medium复杂（或者是风格不一样）
+
+[BD202301公园]([码题集OJ-公园 (matiji.net)](https://www.matiji.net/exam/brushquestion/1/4347/179CE77A7B772D15A8C00DD8198AAC74)): 常规的BFS+提升
+
+[BD202302蛋糕划分]([码题集OJ-蛋糕划分 (matiji.net)](https://www.matiji.net/exam/brushquestion/2/4347/179CE77A7B772D15A8C00DD8198AAC74)): 思路就是二分答案，但是check的方法比较难想
+
+力扣周赛362
+
+第三题暴力回溯回来看文档了，有一段时间没写了，还需要加强
+
+[380. O(1) 时间插入、删除和获取随机元素](https://leetcode.cn/problems/insert-delete-getrandom-o1/)：之前留的坑，回来补上。注意remove函数需要把最后一个数移到remove这个数的位置
+
+### 2023.9.11
+
+百度之星a了一条二分答案
+
+每日一题一个新知识点：贪心+后悔堆
+
+### 2023.9.12
+
+每日一题：[1462. 课程表 IV](https://leetcode.cn/problems/course-schedule-iv/)没想到拓扑排序，用暴力dfs+记忆化搜索勉强过了。看评论貌似写法还挺多的：1. 最短路 先把两个点之间是否联通跑了，后面查找就o(1)了；2. 拓扑排序；3. 类似并查集把每个节点下面的节点都标记了
+
+### 2023.9.14
+
+题目不难，但是好思路不好想:
+
+[1222. 可以攻击国王的皇后](https://leetcode.cn/problems/queens-that-can-attack-the-king/)可以从国王出发

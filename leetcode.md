@@ -263,11 +263,96 @@ P.S.本题另一个小细节：防止重复三元组的出现，三个指针每�
   + [2488. 统计中位数为 K 的子数组](https://leetcode.cn/problems/count-subarrays-with-median-k/):
   + [2845. 统计趣味子数组的数目](https://leetcode.cn/problems/count-of-interesting-subarrays/): 注意到这里配合了模运算，因此先将前缀和取模，本质大同小异
 
-## 半贪心半dp的一种题：
+## 贪心
+
+### 半贪心半dp的一种题：
 
 每次讨论新增一个数对前面整体的影响
 
 [1798. 你能构造出连续值的最大数目](https://leetcode.cn/problems/maximum-number-of-consecutive-values-you-can-make/)
+
+### 贪心+后悔堆
+
+核心：拿完之后发现有更好的，从堆里面弹出来，拿更好的
+
+[630. 课程表 III](https://leetcode.cn/problems/course-schedule-iii/):
+
+首先，优先拿截止日期靠前的（这样一定不亏：因同样情况下，先拿时间靠后+再拿时间靠前够的话，先拿时间考前+再拿时间靠后一定时间也够；但反过来不一定成立）
+
+其次，遍历所有course，若能拿一定拿，拿不了和已经拿的最长的比较，若新遍历到的时间短，则换一下
+
+```c++
+class Solution {
+public:
+    struct cmp{
+        bool operator()(vector<int>& a, vector<int>& b){
+            return a[1]<b[1];
+        }
+    };
+    int scheduleCourse(vector<vector<int>>& courses) {
+        sort(courses.begin(),courses.end(),cmp());
+        priority_queue<int> pq;
+        int day=0;
+        for(auto&c: courses){
+            int duration=c[0],last_day=c[1];
+            if(day+duration<=last_day){
+                day+=duration;
+                pq.push(duration);
+            }else if(!pq.empty()&&duration<pq.top()){
+                day-=pq.top()-duration;
+                pq.pop();
+                pq.push(duration);
+            }
+        }
+        return pq.size();
+    }
+};
+```
+
+[871. 最低加油次数](https://leetcode.cn/problems/minimum-number-of-refueling-stops/): 大同小异。先尽可能不加，如果不够了，再看前面哪里加油加的最多
+
+```c++
+class Solution {
+public:
+    int minRefuelStops(int target, int startFuel, vector<vector<int>>& stations) {
+        if(stations.size()==0){
+            if(target>startFuel){
+                return -1;
+            }else{
+                return 0;
+            }
+        }
+        vector<int> add;
+        add.push_back(target);
+        add.push_back(0);
+        stations.push_back(add);
+        int ans=0;
+        int currentFuel=startFuel;
+        int currentDistance=0;
+        priority_queue<int>pq;
+        for(vector<int> station:stations){
+            int this_distance=station[0]-currentDistance;
+            if(this_distance>currentFuel){
+                if(pq.empty()){
+                    return -1;
+                }
+                while(!pq.empty()&&this_distance>currentFuel){
+                    currentFuel+=pq.top();
+                    pq.pop();
+                    ans++;
+                }
+                if(this_distance>currentFuel){
+                    return -1;
+                }
+            }
+            currentFuel-=this_distance;
+            pq.push(station[1]);
+            currentDistance=station[0];
+        }
+        return ans;
+    }
+};
+```
 
 ## 单调栈
 
@@ -439,6 +524,7 @@ public:
 ### 二分答案：
 
 + <mark>如果题目中有「最大化最小值」或者「最小化最大值」，一般都是二分答案</mark>
++ <mark>二分答案的关键在于如何设计check函数</mark>
 
 [2517. 礼盒的最大甜蜜度](https://leetcode.cn/problems/maximum-tastiness-of-candy-basket/):**（最大化最小值）**排序后（显然要排序），首先确定答案的范围一定是在(0, $$\frac{price.back()-price[0]}{k-1}+1$$)之间（即均匀选择每一个礼物），然后在这个区间里通过二分“寻找”答案。
 
@@ -452,6 +538,8 @@ public:
 
 1. 注意speed不要有0的可能，带进函数会出错（这就对于二分的left设定有标准了，在left侧为闭区间的情况下，left不能为0）
 2. <mark>边界条件（本题为left）一定要想明白开/闭区间</mark>，想清楚能不能取到（本题有一个样例为piles=[2,2], h=2, 若left取total/h且为开区间就会出事）
+
+[码蹄集·BD202302·蛋糕划分]([码题集OJ-蛋糕划分 (matiji.net)](https://www.matiji.net/exam/brushquestion/2/4347/179CE77A7B772D15A8C00DD8198AAC74)): check函数的设计是关键！遍历横切，考虑让每一个格子都小于等于可能的ans的值，看竖切数够不够用
 
 ## 三个数运算暴力枚举的优化
 
@@ -719,7 +807,7 @@ class Solution:
 
 ### 组合型回溯
 
-
+# #############################待施工###############################
 
 ### 剪枝：
 
@@ -1206,6 +1294,297 @@ public int maxSumTwoNoOverlap(int[] nums, int firstLen, int secondLen) {
 
 一般不需要使用过于复杂的数据结构，开二维数组就行
 
+### 有向图找环（拓扑排序）
+
+[802. 找到最终的安全状态](https://leetcode.cn/problems/find-eventual-safe-states/)：
+
++ 方法1：三色法，将没被遍历过的节点设为0（白色），不安全的（在环上的）或在递归栈中的节点设为1（灰色），已经确认安全的节点为黑色。那么从一个节点开始DFS，把路径标为灰色，碰到灰色则此DFS路径不安全，碰到黑色则安全。那么一个节点的安全与否可以转化为多个子问题：它所有的出边指向的节点是否安全？
+
+```python
+dfs(i):
+    if color[i]==1:
+        return False
+    elif color[i]==2:
+        return True # 这几行是边界条件，即该节点已经被遍历过
+    color[i]=1      # 若该节点之前没被遍历，现在遍历到了，染灰
+    for j in graph[i]:
+        if dfs(j) == False:
+            return False # 找到一条路不安全
+    color[i]=2 # 所有路都安全，记得把这个节点的颜色改掉
+    return True
+```
+
+<mark>（补注*递归思路：若本身为1（不安全）或2（安全），直接返回；将自己设置为1（表明已经经过了）；遍历所有子路，有一条不安全就不安全，全部安全后回溯到该节点（该节点所有路都遍历完了），该节点变为安全）</mark>
+
+方法大同小异：[207. 课程表](https://leetcode.cn/problems/course-schedule/)
+
+### 拓扑排序(Topological Sort)：
+
++ 能进行拓扑排序的**充要条件：是一个有向无环图**
+
+1. 判断是否能进行拓扑排序
+
+同上：[207. 课程表](https://leetcode.cn/problems/course-schedule/)
+
+2. 给出一个拓扑排序
+
+[210. 课程表 II](https://leetcode.cn/problems/course-schedule-ii/): 给出拓扑排序的模板题，有结合DFS和BFS两种思路
+
+**结合DFS思路：**先从某个指定节点往下搜索，全部搜索完成后，在“归”的环节将这个节点放入路径中。用vis数组标明某个节点已经遍历/正在遍历队列中，辅助dfs
+
+```c++
+class Solution {
+    vector<int>ans;
+    vector<vector<int>>grid;
+    vector<int>vis;
+public:
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        grid.resize(numCourses);
+        vis.resize(numCourses,0);
+        for(vector<int> ver:prerequisites){
+            grid[ver[0]].push_back(ver[1]);
+        }
+        for(int i=0;i<numCourses;i++){
+            if(vis[i]==0){
+                bool res=dfs(i);
+                if(!res)
+                {
+                    return vector<int>(0);
+                }
+            }
+        }
+        return ans;
+    }
+    bool dfs(int i){
+        if(vis[i]==2){
+            return true;//遍历到安全节点，这个节点肯定已经加入答案中，直接返回
+        }
+        if(vis[i]==1){
+            return false;//如果这个节点在遍历过程中又遇到了自己，说明存在环，答案不存在
+        }
+        vis[i]=1;
+        for(int next:grid[i]){
+            if(!dfs(next)){
+                return false;
+            }
+        }
+        vis[i]=2;
+        ans.push_back(i);//在“归”的环节中将节点压入答案队列
+        return true;
+    }
+};
+```
+
+也有一种结合栈的DFS写法，这里给出（直接抄官方题解了）：
+
+```c++
+class Solution {
+private:
+    // 存储有向图
+    vector<vector<int>> edges;
+    // 存储每个节点的入度
+    vector<int> indeg;
+    // 存储答案
+    vector<int> result;
+
+public:
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        edges.resize(numCourses);
+        indeg.resize(numCourses);
+        for (const auto& info: prerequisites) {
+            edges[info[1]].push_back(info[0]);
+            ++indeg[info[0]];
+        }
+
+        queue<int> q;
+        // 将所有入度为 0 的节点放入队列中
+        for (int i = 0; i < numCourses; ++i) {
+            if (indeg[i] == 0) {
+                q.push(i);
+            }
+        }
+
+        while (!q.empty()) {
+            // 从队首取出一个节点
+            int u = q.front();
+            q.pop();
+            // 放入答案中
+            result.push_back(u);
+            for (int v: edges[u]) {
+                --indeg[v];
+                // 如果相邻节点 v 的入度为 0，就可以选 v 对应的课程了
+                if (indeg[v] == 0) {
+                    q.push(v);
+                }
+            }
+        }
+
+        if (result.size() != numCourses) {
+            return {};
+        }
+        return result;
+    }
+};
+```
+
+**结合BFS思路：**这个用队列实现的迭代是和递归是反过来的，迭代必须从没有入度的点开始，而递归理论上最好从“众矢之的”的点开始（在上面的DFS递归中，其实从任意点开始也行）
+
+用队列的核心思路是：将所有入度为0的节点入列，然后开始遍历每个队列头节点的下一层节点，去掉它们的一个入度（即把前面那些入度为0的节点删去），再把入度为0的节点放入队列中，如此往复。从队列中弹出的序列就是最终答案
+
+```c++
+class Solution {
+private:
+    // 存储有向图
+    vector<vector<int>> edges;
+    // 存储每个节点的入度
+    vector<int> indeg;
+    // 存储答案
+    vector<int> result;
+
+public:
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        edges.resize(numCourses);
+        indeg.resize(numCourses);
+        for (const auto& info: prerequisites) {
+            edges[info[1]].push_back(info[0]);
+            ++indeg[info[0]];
+        }
+
+        queue<int> q;
+        // 将所有入度为 0 的节点放入队列中
+        for (int i = 0; i < numCourses; ++i) {
+            if (indeg[i] == 0) {
+                q.push(i);
+            }
+        }
+
+        while (!q.empty()) {
+            // 从队首取出一个节点
+            int u = q.front();
+            q.pop();
+            // 放入答案中
+            result.push_back(u);
+            for (int v: edges[u]) {
+                --indeg[v];
+                // 如果相邻节点 v 的入度为 0，就可以选 v 对应的课程了
+                if (indeg[v] == 0) {
+                    q.push(v);
+                }
+            }
+        }
+
+        if (result.size() != numCourses) {
+            return {};
+        }
+        return result;
+    }
+};
+```
+
+3. 判断前导节点：
+
+模板题:[1462. 课程表 IV](https://leetcode.cn/problems/course-schedule-iv/)
+
+这题与上面不同，需要找出每个节点的前导节点。因此仅给出一个可行的拓扑序列的解是不能解决问题的。需要判断某a是否在某b前面。注意，如果a和b无关（比如都不需要前导课程），那么对query=[a,b]应当给出false，但如果只给出了一个可行的拓扑排序结果，那么a与b一定有先后顺序，这并不是我们想要的。
+
+因此，这题（似乎）只能采用从“基础课程”（没有入度的点）逐渐向“高阶课程”（要求前导课程比较多的课程）迭代的方式（因为不一定能找到一个能统领全局，居于最高地位的课程，没有这样的课的话从顶到下的递归无法进行）。注意到，每从一个基础课cur->进阶课next的转化中，必有isPre\[cur][next]==1；其次，cur的所有前导课pre必有isPre\[pre][next]\==1。因此，每枚举一个next，都要对所有课程进行扫描以根据它是否与cur产生关系退出它是否与next有关系。
+
+代码：
+
+```c++
+class Solution {
+public:
+    vector<bool> checkIfPrerequisite(int numCourses, vector<vector<int>>& prerequisites, vector<vector<int>>& queries) {
+        vector<vector<int>> grid(numCourses);
+        queue<int> que;
+        vector<int> inputs(numCourses,0);
+        vector<vector<int>> isPre(numCourses,vector<int>(numCourses,0));
+        for(vector<int>pre: prerequisites){
+            grid[pre[0]].push_back(pre[1]);
+            inputs[pre[1]]++;
+        }
+        for(int i=0;i<numCourses;i++){
+            if(inputs[i]==0){
+                que.push(i);
+            }
+        }
+        while(!que.empty()){
+            int cur=que.front();
+            que.pop();
+            for(int next:grid[cur]){
+                isPre[cur][next]=1;
+                for(int i=0;i<numCourses;i++){
+                    isPre[i][next]=isPre[i][next]|isPre[i][cur];
+                }
+                --inputs[next];
+                if(inputs[next]==0){
+                    que.push(next);
+                }
+            }
+        }
+        vector<bool>res;
+        for(auto& query:queries){
+            res.push_back(isPre[query[0]][query[1]]);
+        }
+        return res;
+    }
+};
+```
+
+### Tarjan算法：
+
++ Tarjan算法核心：
+  + 用DFS跑一张无向图
+  + 按DFS的遍历顺序记录所有节点的“时间戳”，即遍历每个节点的时间顺序，放入dfn数组中
+  + 遍历的过程中，若某节点的邻居是之前遍历过的节点（且不是它的父亲），那么这个节点的low数组对应值变为它这个邻居的时间戳。同时，它所有（一路遍历过来的）父亲节点的low值也变为该值。
+  + 若两个相邻节点x，y满足low[x]>dfn[y]，说明到达x节点必须经过y，故这是一座“桥”
+
+[1192. 查找集群内的关键连接](https://leetcode.cn/problems/critical-connections-in-a-network/): **Tarjan算法模板题**
+
+```c++
+class Solution {
+    vector<vector<int>> grid;//图
+    vector<vector<int>> ans;
+    vector<int> dfn;//时间戳
+    vector<int> low;
+    vector<int> vis;
+    int cur;
+public:
+    void tarjan(int now, int fa){
+        vis[now]=1;
+        dfn[now]=cur;
+        low[now]=cur++;
+        for(int next:grid[now]){
+            if(next==fa){
+                continue;
+            }
+            if(!vis[next]){
+                tarjan(next,now);
+                low[now]=min(low[now],low[next]);
+                if(dfn[now]<low[next]){//因next时间戳大于now，故不可能dfn[next]<low[now]，所以只考虑一种情况
+                    ans.push_back({now,next});
+                }
+            }else{
+                low[now]=min(low[now],dfn[next]);//若又遍历到一个已经经过的节点，这条边不可能是答案（因为来时的路证明可以有另一条通路），故不更新答案
+            }
+        }
+    }
+    vector<vector<int>> criticalConnections(int n, vector<vector<int>>& connections) {
+        this->cur=0;
+        grid.resize(n);
+        dfn.resize(n);
+        low.resize(n);
+        vis.resize(n,0);
+        for(vector<int>con:connections){
+            grid[con[0]].push_back(con[1]);
+            grid[con[1]].push_back(con[0]);
+        }
+        tarjan(0,-1);
+        return ans;
+    }
+};
+```
+
 ## DFS
 
 ### 二叉树DFS模板：
@@ -1289,93 +1668,40 @@ dfs(0,-1)//从编号为0的节点开始，-1表示它没有父节点
 
 [200. 岛屿数量](https://leetcode.cn/problems/number-of-islands/)：同理，只不过这里用数组表示节点。**将已经遍历过的地点换一个数（比如-1）**，就不需要再遍历了
 
-### 有向图找环（拓扑排序）
 
-[802. 找到最终的安全状态](https://leetcode.cn/problems/find-eventual-safe-states/)：
 
-+ 方法1：三色法，将没被遍历过的节点设为0（白色），不安全的（在环上的）或在递归栈中的节点设为1（灰色），已经确认安全的节点为黑色。那么从一个节点开始DFS，把路径标为灰色，碰到灰色则此DFS路径不安全，碰到黑色则安全。那么一个节点的安全与否可以转化为多个子问题：它所有的出边指向的节点是否安全？
 
-```python
-dfs(i):
-    if color[i]==1:
-        return False
-    elif color[i]==2:
-        return True # 这几行是边界条件，即该节点已经被遍历过
-    color[i]=1      # 若该节点之前没被遍历，现在遍历到了，染灰
-    for j in graph[i]:
-        if dfs(j) == False:
-            return False # 找到一条路不安全
-    color[i]=2 # 所有路都安全，记得把这个节点的颜色改掉
-    return True
-```
 
-<mark>（补注*递归思路：若本身为1（不安全）或2（安全），直接返回；将自己设置为1（表明已经经过了）；遍历所有子路，有一条不安全就不安全，全部安全后回溯到该节点（该节点所有路都遍历完了），该节点变为安全）</mark>
+## BFS: 
 
-方法大同小异：[207. 课程表](https://leetcode.cn/problems/course-schedule/)
-
-### Tarjan算法：
-
-+ Tarjan算法核心：
-  + 用DFS跑一张无向图
-  + 按DFS的遍历顺序记录所有节点的“时间戳”，即遍历每个节点的时间顺序，放入dfn数组中
-  + 遍历的过程中，若某节点的邻居是之前遍历过的节点（且不是它的父亲），那么这个节点的low数组对应值变为它这个邻居的时间戳。同时，它所有（一路遍历过来的）父亲节点的low值也变为该值。
-  + 若两个相邻节点x，y满足low[x]>dfn[y]，说明到达x节点必须经过y，故这是一座“桥”
-
-[1192. 查找集群内的关键连接](https://leetcode.cn/problems/critical-connections-in-a-network/): **Tarjan算法模板题**
++ **BFS模板：**
 
 ```c++
-class Solution {
-    vector<vector<int>> grid;//图
-    vector<vector<int>> ans;
-    vector<int> dfn;//时间戳
-    vector<int> low;
-    vector<int> vis;
-    int cur;
-public:
-    void tarjan(int now, int fa){
-        vis[now]=1;
-        dfn[now]=cur;
-        low[now]=cur++;
-        for(int next:grid[now]){
-            if(next==fa){
-                continue;
-            }
-            if(!vis[next]){
-                tarjan(next,now);
-                low[now]=min(low[now],low[next]);
-                if(dfn[now]<low[next]){//因next时间戳大于now，故不可能dfn[next]<low[now]，所以只考虑一种情况
-                    ans.push_back({now,next});
-                }
-            }else{
-                low[now]=min(low[now],dfn[next]);//若又遍历到一个已经经过的节点，这条边不可能是答案（因为来时的路证明可以有另一条通路），故不更新答案
-            }
+//假设一共n个节点
+vector<vector<int>> grid;//每个数组i记录它的所有相邻节点
+queue<int> que;
+vector<int> vis(n,0);
+que.push(i);//假设以节点i为中心作BFS
+while(!que.empty()){
+    int cur=que.front();
+    que.pop();
+    vis[cur]=1;
+    //do something
+    for(int next:grid[cur]){
+        if(!vis[next]){
+            que.push(next);
         }
     }
-    vector<vector<int>> criticalConnections(int n, vector<vector<int>>& connections) {
-        this->cur=0;
-        grid.resize(n);
-        dfn.resize(n);
-        low.resize(n);
-        vis.resize(n,0);
-        for(vector<int>con:connections){
-            grid[con[0]].push_back(con[1]);
-            grid[con[1]].push_back(con[0]);
-        }
-        tarjan(0,-1);
-        return ans;
-    }
-};
+}
 ```
 
-
-
-## BFS：
+#### <mark>BFS常用于发掘一条最短的路径</mark>
 
 <mark>这最好别拿递归实现！就用队列！</mark>
 
 递归虽然可以参数加一个depth，但实际运行还是一个枝一个枝跑的（和DFS一样），有些情况会出问题
 
-+ BFS模板题：[1926. 迷宫中离入口最近的出口](https://leetcode.cn/problems/nearest-exit-from-entrance-in-maze/) 不要拿dfs的递归来写！遍历过的直接变成墙避免重复遍历（用DFS写的话，复杂的枝可能把简单的路堵上）
++ 二维数组中的BFS模板题：[1926. 迷宫中离入口最近的出口](https://leetcode.cn/problems/nearest-exit-from-entrance-in-maze/) 不要拿dfs的递归来写！遍历过的直接变成墙避免重复遍历（用DFS写的话，复杂的枝可能把简单的路堵上）
 
 ```java
 int nearestExit(vector<vector<char>>& maze, vector<int>& entrance) {
@@ -1405,6 +1731,10 @@ int nearestExit(vector<vector<char>>& maze, vector<int>& entrance) {
         return -1;
     }
 ```
+
+[码蹄集·BD202301·公园]([码题集OJ-公园 (matiji.net)](https://www.matiji.net/exam/brushquestion/1/4347/179CE77A7B772D15A8C00DD8198AAC74)): 找到两个人一起走的最短路径，这里需要对目的地、两个人分别为中心点做一次BFS，从而找到每个点距离这三者的距离。最后遍历每个点，通过这个点距离三者的距离算出以这个点为交点的结果，并更新答案。
+
+
 
 ## 还原二叉树
 
