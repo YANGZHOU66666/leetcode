@@ -1832,6 +1832,10 @@ public class Codec {
 
 [8. 字符串转换整数 (atoi)](https://leetcode.cn/problems/string-to-integer-atoi/)
 
+## 最大矩形面积问题：常转化为高度数组
+
+[85. 最大矩形](https://leetcode.cn/problems/maximal-rectangle)：将每个坐标处的从之开始的向上的连续1的个数存到数组里，那么每一行的数据就可以转化为84题（高度数组求最大矩形）的做法，用单调栈即可
+
 ## 思路特殊的题目积累：
 
 （周赛332）[6356. 子字符串异或查询](https://leetcode.cn/problems/substring-xor-queries/)：暴力把字符串能表示的所有二进制数（答案能取到的）全放进容器里，然后无脑查找

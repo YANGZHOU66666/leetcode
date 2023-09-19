@@ -141,3 +141,13 @@ class Solution {
 题目不难，但是好思路不好想:
 
 [1222. 可以攻击国王的皇后](https://leetcode.cn/problems/queens-that-can-attack-the-king/)可以从国王出发
+
+### 2023.9.19
+
+好几天没记录了，把最近几天比较有价值的题目拿来记录一下
+
+[LCP 34. 二叉树染色](https://leetcode.cn/problems/er-cha-shu-ran-se-UGC)：树形DP模板题，关键在于每棵子树根节点位置**每一种连续染色长度**的状态，返还给其父节点。这题搞懂以后，[337. 打家劫舍 III](https://leetcode.cn/problems/house-robber-iii)就是它的一种特殊情况
+
+[85. 最大矩形](https://leetcode.cn/problems/maximal-rectangle)：从二维矩阵图中抠出来一些高度数组后即可转化为[84. 柱状图中最大的矩形](https://leetcode.cn/problems/largest-rectangle-in-histogram)。
+
+[32. 最长有效括号](https://leetcode.cn/problems/longest-valid-parentheses)：用栈很容易想，但是重要的是这题要把最后一个')'放在栈底

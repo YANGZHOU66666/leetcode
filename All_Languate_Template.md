@@ -128,6 +128,7 @@ arr.addAll([4,5,6]);//将指定集合的所有元素添加到末尾
 int x=arr.get(i);//返回第i个元素
 arr.set(2,5);//将下标为2的位置设置为5
 arr.remove(arr.size()-1);//将下标为arr.size()-1的位置的元素删除
+Collections.sort(arr);//按升序排序
 ```
 
 #### Java: 普通数组
@@ -171,7 +172,7 @@ arr.slice();
 
 ### 栈（Stack）
 
-#### Java:
+#### Java: Stack
 
 ```java
 Stack<Integer> stk=new Stack<Integer>();//初始化
@@ -180,6 +181,20 @@ stk.isEmpty();//判断是否为空
 stk.peek();//返回栈顶元素
 stk.pop();//弹出元素
 ```
+
+#### Java: Deque
+
+```java
+Deque<Integer> stk=new LinkedList<Integer>();
+stk.push(1);
+stk.push(2);
+stk.push(3);
+stk.pop();
+stk.isEmpty();
+stk.peek();//栈顶元素
+```
+
+
 
 #### C++:
 
