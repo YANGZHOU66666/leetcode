@@ -1218,7 +1218,78 @@ dp[i][k][1] = max(dp[i-1][k][1],dp[i-1][k-1][0]-prices[i])
 
 ### 换根DP
 
-[834. 树中距离之和](https://leetcode.cn/problems/sum-of-distances-in-tree/)
+[310. 最小高度树](https://leetcode.cn/problems/minimum-height-trees)：
+
+任找一节点作为根节点开始DFS，同时记录每个节点处的子树高度。这样，每经过一次相邻根节点的换根，新根的树的高度=max{前一个步骤算出的子树高度，上一个根节点的不经过新根的最大子树高度}，这样就可以在o(n)时间解决问题。
+
+```c++
+class Solution {
+public:
+    void dfs1(vector<vector<int>>& graph, vector<int>&height0, int u){
+        height0[u]=1;
+        int h=0;
+        for(int next:graph[u]){
+            if(height0[next]!=0){
+                continue;
+            }
+            dfs1(graph,height0,next);
+            h=max(h,height0[next]);
+        }
+        height0[u]=h+1;
+    }
+    void dfs2(vector<vector<int>>& graph, vector<int>& height0, vector<int>&height, int u){
+        int first=0;
+        int second=0;
+        for(int next:graph[u]){
+            if(height0[next]>first){
+                second=first;
+                first=height0[next];
+            }else if(height0[next]>second){
+                second=height0[next];
+            }
+        }
+        height[u]=first+1;
+        for(int next:graph[u]){
+            if(height[next]!=0){
+                continue;
+            }
+            height0[u]=(height0[next] != first?first:second)+1;
+            dfs2(graph,height0,height,next);
+        }
+    }
+    vector<int> findMinHeightTrees(int n, vector<vector<int>>& edges) {
+        vector<vector<int>> graph(n);
+        for(const auto&e:edges){
+            graph[e[0]].push_back(e[1]);
+            graph[e[1]].push_back(e[0]);
+        }
+        vector<int> height0(n,0);
+        vector<int> height(n,0);
+        dfs1(graph, height0, 0);
+        dfs2(graph,height0,height,0);
+        vector<int> ans;
+        int h=n;
+        for(int i=0;i<n;i++){
+            if(height[i]<h){
+                h=height[i];
+                ans.clear();
+            }
+            if(height[i]==h){
+                ans.push_back(i);
+            }
+        }
+        return ans;
+    }
+};
+```
+
+
+
+
+
+[834. 树中距离之和](https://leetcode.cn/problems/sum-of-distances-in-tree/)：
+
+# #########待施工##########
 
 ## 动态规划题目积累：
 
@@ -1321,6 +1392,8 @@ dfs(i):
 ### 拓扑排序(Topological Sort)：
 
 + 能进行拓扑排序的**充要条件：是一个有向无环图**
+
+#### 拓扑排序原生用法：确立顺序
 
 1. 判断是否能进行拓扑排序
 
@@ -1531,6 +1604,34 @@ public:
 };
 ```
 
+#### 拓扑排序另一用法：四周包围中心，逐渐收紧，可看作“反向BFS”，也常用来判断最小路径
+
+[310. 最小高度树](https://leetcode.cn/problems/minimum-height-trees)：从叶子节点（度为1的）开始删除，删去一圈叶子节点后，中心的部分又变成一颗小一点的树。最终收缩到最中间的节点后，该节点就是要求的根节点，高度即为收缩的厚度加上和中间相连的部分
+
+```python
+class Solution:
+    def findMinHeightTrees(self, n: int, edges: List[List[int]]) -> List[int]:
+        in_degree, connect = [0] * n, defaultdict(list)
+        for a, b in edges:
+            in_degree[a] += 1
+            in_degree[b] += 1
+            connect[a].append(b)
+            connect[b].append(a)
+        nodes = [i for i, v in enumerate(in_degree) if v <= 1]
+        while n > 2:
+            n -= len(nodes)
+            nxt = []
+            for node in nodes:
+                for other in connect[node]:
+                    in_degree[other] -= 1
+                    if in_degree[other] == 1:
+                        nxt.append(other)
+            nodes = nxt
+        return nodes
+```
+
+
+
 ### Tarjan算法：
 
 + Tarjan算法核心：
@@ -1658,6 +1759,21 @@ void dfs(int cur,int fa){
     }
 }
 dfs(0,-1)//从编号为0的节点开始，-1表示它没有父节点
+```
+
+### 补充：在图中，将图转化为树，算树高（不是二叉树的处理方法）
+
+```c++
+void dfs1(vector<vector<int>>& graph, vector<int>& height0, int u) {
+    height0[u] = 1;
+    int h = 0;
+    for (int v : graph[u]) {
+        if (height0[v] != 0) continue;
+        dfs1(graph, height0, v);
+        h = max(h, height0[v]);
+    }
+    height0[u] = h + 1;
+}
 ```
 
 

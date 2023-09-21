@@ -151,3 +151,10 @@ class Solution {
 [85. 最大矩形](https://leetcode.cn/problems/maximal-rectangle)：从二维矩阵图中抠出来一些高度数组后即可转化为[84. 柱状图中最大的矩形](https://leetcode.cn/problems/largest-rectangle-in-histogram)。
 
 [32. 最长有效括号](https://leetcode.cn/problems/longest-valid-parentheses)：用栈很容易想，但是重要的是这题要把最后一个')'放在栈底
+
+### 2023.9.21
+
+[310. 最小高度树](https://leetcode.cn/problems/minimum-height-trees)：两种解法，换根DP和拓扑排序，都很有启发性
+
+
+
