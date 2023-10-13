@@ -156,5 +156,24 @@ class Solution {
 
 [310. 最小高度树](https://leetcode.cn/problems/minimum-height-trees)：两种解法，换根DP和拓扑排序，都很有启发性
 
+### 2023.10.9
 
+**近期重难点记录：**
 
+内向基环树：[有向图访问计数](https://leetcode.cn/problems/count-visited-nodes-in-a-directed-graph/)
+
+有约束的回溯：[37. 解数独](https://leetcode.cn/problems/sudoku-solver)
+
+原地哈希：[41. 缺失的第一个正数](https://leetcode.cn/problems/first-missing-positive)
+
+复杂的哈希表模拟题：[460. LFU 缓存](https://leetcode.cn/problems/lfu-cache/)
+
+multiset的用法，有一些难度的模拟题：[2034. 股票价格波动](https://leetcode.cn/problems/stock-price-fluctuation)
+
+### 2023.10.10
+
+状态转移方程没想出来：[115. 不同的子序列](https://leetcode.cn/problems/distinct-subsequences)
+
+### 2023.10.11
+
+c++：substr的用法混了

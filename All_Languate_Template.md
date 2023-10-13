@@ -26,7 +26,7 @@ max(a,b)
 
 ### 数组排序
 
-+ JavaScript:
+#### JavaScript:
 
 ```javascript
 //默认按照字典序排序
@@ -48,6 +48,15 @@ users.sort(function(userA, userB){return userA.age - userB.age});
 ```java
 int[] arr={1,8,9,4,2,4};
 Arrays.sort(arr);//升序排序，用Arrays类内置函数
+Arrays.sort(arr,(x,y) -> {return x-y;});//升序排序
+Arrays.sort(arr,(x,y) -> {return y-x;});//降序排序
+//或者：
+Arrays.sort(arr,(x,y) -> x-y);//升序排序
+List<List<Integer> lis=new ArrayList<List<Integer>>();
+//对列表排序：让我们假定里面有一些元素
+lis.sort((x, y)-> {return x.get(1)-y.get(1);});//按照索引为1的值升序排序
+//还可以写为：
+lis.sort((x, y) -> x.get(1)-y.get(1));//也是按索引为1的值升序排序
 ```
 
 #### C++:
@@ -64,17 +73,43 @@ grid.push_back([3,2]);
 grid.push_back([5,3]);
 grid.push_back([1,3]);
 sort(grid.begin(),grid.end());//二维数组按照数组元素的第一个数字从小到大排序
-//自定义排序：
+//自定义排序：（优先队列的自定义排序也可以这么写）
 struct cmp{
     bool operator()(vector<int>& a, vector<int>&b){//这里的两个参数随机应变
-        return a[1]<a[b];//按照a、b数组的第二个元素从小到大排序
+        return a[1]<b[1];//按照a、b数组的第二个元素从小到大排序
                          //a<b: 从小到大;a>b: 从大到小
     }
 }
-sort(grid.begin(),grid.end(),cmp());
+sort(grid.begin(),grid.end(),cmp);
 ```
 
+<mark>这里需要特别注意，自定义排序c++是用小于和大于来写，Java和JavaScript是用减号来写</mark>
 
+
+
+### lambda
+
+#### Java:
+
+```java
+(x,y) -> x+y;//看作f(x,y){ return x+y;}
+() -> System.out.println("Hello");
+```
+
+#### JavaScript:
+
+```javascript
+function(a,b){return a-b;}
+```
+
+### filter
+
+#### JavaScript:
+
+```javascript
+let arr=[1,7,3,4,5,9,8];
+let res=arr.filter((num) => {return num>=5;});
+```
 
 ### 数组基本操作
 
@@ -112,12 +147,50 @@ it<v.end();//判断结束
 return vector<int>(0);
 ```
 
+#### Java: LinkedList——底层是双向链表
+
+```java
+List<Integer> arr=new ArrayList<Integer>();
+List<Integer> lList=new LinkedList<Integer>();
+List<Integer> lList2=new LinkedList<Integer>(arr);//从其他数据结构构造
+lList.add(1);//向尾部插入元素，o(1)
+lList.add(2);
+lList.add(1,2);//向index为1的节点插入元素，并将其他挤到后面，o(n)
+lList.remove(1);//移除index为1位置的元素，o(n)
+lList.remove(new Integer(2));//移除某对象所在的节点，o(n)
+lList.removeFirst();//移除首节点，o(1)
+lList.removeLast();//移除尾节点，o(1)
+lLast.addAll(arr);//加一组数
+lLast.get(1);//返回下标为1位置的数
+lLast.set(1,new Integer(5));//改变某下标位置的数
+lLast.contains(new Integer(2));//查找是否有某元素
+lLast.indexOf(new Integer(2));//查找下标
+lLast.lastIndexOf(new Integer(2));//最后一个位置的下标
+lLast.subList(1,3);//截取部分链表
+//遍历：
+for(int num: lLast){
+    //do something
+}
+ListIterator<Integer> it=lLast.listIterator();
+while(it.hasNext()){
+    it.next();//do something with it
+}
+//反向遍历：
+ListIterator<Integer> it2=lLast.listIterator(lLast.size());
+while(it2.hasPrevious()){
+    it.previous();//do something with it
+}
+```
+
+
+
 #### Java: ArrayList
 
 > Java的List分为ArrayList和LinkedList两种
 
 ```java
 List<Integer> arr=new ArrayList<Integer>();
+List<Integer> arr2=new ArrayList<Integer>(15);//开大小为15的空间
 //开二维数组:
 List<List<Integer>> grid=new ArrayList<List<Integer>>();
 for(int i=0;i<n;i++){
@@ -128,10 +201,21 @@ arr.addAll([4,5,6]);//将指定集合的所有元素添加到末尾
 int x=arr.get(i);//返回第i个元素
 arr.set(2,5);//将下标为2的位置设置为5
 arr.remove(arr.size()-1);//将下标为arr.size()-1的位置的元素删除
+List<Integer> arr3=new ArrayList<Integer>(arr);//通过其他集合构造
 Collections.sort(arr);//按升序排序
 ```
 
 #### Java: 普通数组
+
+```java
+int[] arr1=new int[5];//声明二维数组但不赋值
+int[][] grid1=new int[8][4];//声明二维数组但不赋值
+int[] arr2=new int[]{1,2,3,4,5};//初始化数组
+int[][] move=new int[][]{{0,1},{1,0},{0,-1},{-1,0}};//初始化二维数组
+int n=arr2.length;//返回数组长度
+```
+
+
 
 #### JavaScript: 普通数组([])
 
@@ -170,6 +254,24 @@ arr.concat();
 arr.slice();
 ```
 
+### 链表：
+
+#### C++：
+
+官方给的默认链表格式，自己也要会写
+
+```c++
+struct ListNode{
+    int val;
+    ListNode* next;
+    ListNode(): val(0), next(nullptr){}
+    ListNode(int v): val(v), next(nullptr){}
+    ListNode(int v, ListNode* nex):val(v), next(nex){}
+};
+```
+
+
+
 ### 栈（Stack）
 
 #### Java: Stack
@@ -191,7 +293,8 @@ stk.push(2);
 stk.push(3);
 stk.pop();
 stk.isEmpty();
-stk.peek();//栈顶元素
+stk.peekLast();//栈顶元素
+stk.peekFirst();//队列头元素
 ```
 
 
@@ -205,6 +308,8 @@ stk.empty();
 stk.top();
 stk.pop();
 ```
+
+
 
 ### 双端队列（Deque）
 
@@ -274,10 +379,7 @@ unordered_set<int> set = {9,5,9,8,1,2,3,5,6,1,2,3,4,5,6,7,4,3,3};
 
 ```javascript
 let set=new Set();
-
 ```
-
-
 
 ### 字典（Dict）
 
@@ -285,11 +387,13 @@ let set=new Set();
 
 ```c++
 unordered_map<int, string> umap;//声明
-//
+//注意：直接对未初始化的umap[i]++，直接生成默认0再操作
 umap.emplace(key,value);//向umap中添加键值对
 umap[1]="aaa";//向umap中添加键值对
-umap.find(key)找到此key并返回其迭代器，否则返回umap.end()
-    //(注意是找到key不是找到其对应的value)
+umap.find(key);//找到此key并返回其迭代器，否则返回umap.end()
+//(注意是找到key不是找到其对应的value)
+umap.count(key);//找到key返回1，否则0
+umap.size();//返回哈希表大小
 //遍历：
 for(pair<int,string>key:umap)
 {
@@ -306,16 +410,18 @@ for(unordered_map::iterator it = map.begin();it!=map.end();it++){
 
 ```java
 Map<Integer, String> hashMap=new HashMap<>();//初始化
-map.put(1,"aaa");//放入键值对
-map.put(2,"bbb");
-map.put(3,"ccc");
+hashMap.put(1,"aaa");//放入键值对
+hashMap.put(2,"bbb");
+hashMap.put(3,"ccc");
 
-map.get(1);//返回键为1的值
-map.remove(1);//删去键为1的键值对
-map.containsKey(2);//检查是否有键为2的键值对
-map.containsValue("bbb");//检查是否有值为"bbb"的键值对
-hashing.replace(3,"cccc");//replace(key,newValue): 更换哈希值
-map.size();//返回键值对的数量
+hashMap.get(1);//返回键为1的值
+hashMap.remove(1);//删去键为1的键值对
+hashMap.containsKey(2);//检查是否有键为2的键值对
+hashMap.containsValue("bbb");//检查是否有值为"bbb"的键值对
+hashMap.replace(3,"cccc");//replace(key,newValue): 更换哈希值
+hashMap.size();//返回键值对的数量
+hashMap.getOrDefault(4,0);//先找key为4有没有，没找到返回0，找到返回对应的value
+
 //遍历1:
 for (Integer key : map.keySet()) {
     System.out.println("key= "+ key + " and value= " + map.get(key));
@@ -366,6 +472,28 @@ dic.clear() # 清空字典
 
 
 
+### 有序集合（multiset）
+
+#### C++: multiset
+
+```c++
+multiset<int> mset;
+mset.insert(3);//插入元素:O(log(n))
+mset.insert(5);
+mset.insert(1);
+mset.insert(2);
+mset.erase(2);//删除元素:O(log(n))，注意会删除所有等于改值的
+mset.erase(mset.begin()+1);//删除某迭代器位置上的元素，即使有重复也只会删除一个
+*mset.begin();//有序集合的首位元素（利用迭代器）
+*mset.rbegin();//有序集合的末尾元素（利用迭代器）
+//自定义排序：类似sort，不再重述
+mset.find(3);//找某元素，找不到返回mset.end()
+mset.count(3);//某元素数量
+mset.upper_bound(5);//第一个大于5的元素的迭代器
+mset.lower_bound(5);//第一个大于等于5的元素的迭代器
+mset.count(5);//5的个数
+```
+
 ### 其他
 
 #### Java: Ramdom类
@@ -385,6 +513,7 @@ str.length();//返回字符串长度
 int place_d=str.rfind('d');//返回d字符从后往前第一次出现的位置，这里是9
 int place_e=str.rfind('e',9);//返回从下标9往前数e第一次出现的下标，这里是4
 int place_h=str.rfind('h');//找不到的话，返回str.npos
+string segment=str.substr(0,5);//注意：1.是substr不是substring，和java不同；2.第二个参数是截取片段长度而非末尾
 ```
 
 #### Java: String
@@ -439,7 +568,7 @@ priority_queue<double, vector<double>, greater<double>> q;//小根
 
 
 
-### 字符串和数字转化
+### 各种基础类型互相转化
 
 #### Java:
 
@@ -447,6 +576,9 @@ priority_queue<double, vector<double>, greater<double>> q;//小根
 //Integer.parseInt(String):将字符串转化为数字
 String twentyOneThousand="2100";
 int num=Integer.parseInt(twentyOneThousand);//num==2100
+//String类转char数组
+String str="hello";
+char[] charArr=str.toCharArray();
 ```
 
 ### 数学
@@ -480,7 +612,16 @@ int solve(int diameter){
 }
 ```
 
+### Filter
 
+#### JavaScript:
+
+```javascript
+let arr1=[1,2,3,4,5];
+let arr2=arr1.filter(item => {
+    return item>=2;
+});
+```
 
 
 
@@ -494,10 +635,4 @@ int solve(int diameter){
 ```
 
 ### 其他：
-
-#### C++:
-
-```c++
-
-```
 

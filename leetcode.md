@@ -200,7 +200,7 @@ var sortColors = function(nums) {
 
 + 双指针：涉及连续子数组时需要想到（e.g.最长的不出现重复字母的子串）
 
-### 同向双指针&滑动窗口
+### 同向双指针
 
 此类题特点：有**连续子数组**，且这个子数组的增长/减少一定会带来不利的影响，满足“只要[l,r]不满足某个要求，那么[l+1，r]也不满足/[l,r+1]也不满足”**(也即一定“单调性”)**
 
@@ -212,7 +212,95 @@ var sortColors = function(nums) {
 
 此类题特点：有**连续子数组**，且这个子数组的增长/减少一定会带来不利的影响，满足“只要[l,r]不满足某个要求，那么[l+1，r]也不满足/[l,r+1]也不满足”**(也即一定“单调性”)**
 
-+ 滑动窗口：特定长度连续子数组，提示很明显
++ 模板：<mark>核心思想为向右追加->while(判断是否valid->更新答案->左边缩进)</mark>
+
+```c++
+/* 同向双指针算法框架 */
+void slidingWindow(string s, string t) {
+    unordered_map<char, int> need, window;
+    for (char c : t) need[c]++;
+    
+    int left = 0, right = 0;
+    int valid = 0; 
+    while (right < s.size()) {
+        // c 是将移入窗口的字符
+        char c = s[right];
+        // 右移窗口
+        right++;
+        // 进行窗口内数据的一系列更新
+        ...
+
+        /*** debug 输出的位置 ***/
+        printf("window: [%d, %d)\n", left, right);
+        /********************/
+        
+        // 判断左侧窗口是否要收缩
+        while (window needs shrink) {
+            // d 是将移出窗口的字符
+            char d = s[left];
+            // 左移窗口
+            left++;
+            // 进行窗口内数据的一系列更新
+            ...
+        }
+    }
+}
+```
+
++ 2023.9.23追加：不只是数组，只要是满足上述**“单调性”**，其他线性表如字符串也可以用该方法
+
+**典型的有如下这种判断子串包含某字符串所有字母的题：**
+
+[76. 最小覆盖子串](https://leetcode.cn/problems/minimum-window-substring)：如上算法模板即可。
+
+```c++
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        int ns=s.size();
+        int nt=t.size();
+        if(ns<nt){
+            return "";
+        }
+        unordered_map<int,int>window, need;
+        for(char ch:t){
+            need[ch]++;
+        }
+        int left=0,right=0;
+        int valid=0;
+        int start=0,len=INT_MAX;
+        while(right<ns){
+            char c=s[right];
+            right++;
+            if(need.count(c)){
+                window[c]++;
+                if(need[c]==window[c]){
+                    valid++;
+                }
+            }
+            while(valid==need.size()){
+                if(right-left<len){
+                    start=left;
+                    len=right-left;
+                }
+                char cc=s[left];
+                left++;
+                if(need.count(cc)){
+                    window[cc]--;
+                    if(window[cc]<need[cc]){
+                        valid--;
+                    }
+                }
+            }
+        }
+        return len==INT_MAX?"":s.substr(start,len);
+    }
+};
+```
+
+
+
+### 滑动窗口：特定长度连续子数组，提示很明显
 
 [2379. 得到 K 个黑块的最少涂色次数](https://leetcode.cn/problems/minimum-recolors-to-get-k-consecutive-black-blocks/)
 
@@ -500,6 +588,20 @@ public:
 [209. 长度最小的子数组](https://leetcode.cn/problems/minimum-size-subarray-sum/)：
 
 因为本题所有数均为正数，故当一段和>=target时，必然左指针右移是赚的，故可以用双指针做。用单调队列依然可行，但是空间复杂度会更高
+
+## 有关优先队列
+
+### 两个堆维护中位数：
+
+[295. 数据流的中位数](https://leetcode.cn/problems/find-median-from-data-stream)：
+
+# ##########待施工##########
+
+### 配合哈希表实现“每次取最大+延后删除”：
+
+[2034. 股票价格波动](https://leetcode.cn/problems/stock-price-fluctuation)：
+
+可以将每天的价格与时间戳直接放进优先队列，同时更新哈希表。若堆顶记录与哈希表中记录不同，直接pop，直到与记录相同。
 
 ## 二分
 
@@ -1306,9 +1408,7 @@ public:
 构造状态、状态转移方程的方式比较特殊，属于非套路型题
 
 + dp\[i][j]表示s的前i位与p的前j位能否正则匹配，能为true，不能为false.为了便于dp，这里将s、p数组的第一位加一个空位（即所有字母往后移动一位）此时p[0]和s[0]想象为空，而后面每一位p[i]即是原来的p[i-1]，s一样
-
 + 首先将dp\[0][i]以及dp\[i][0]的所有值初始化好（这个表示第一位空字符是否配对）
-
 + i、j从1开始的状态转移方程：第一重循环i为枚举的每一个字母，第二重循环为遍历p的每一个字母。
 
   + 遍历到(i,j)位时，若s[i]能与p[j]配对（即字母相同或有'.'），则dp\[i][j]=dp\[i-1][j-1]
@@ -1320,8 +1420,9 @@ public:
     2. p[j]能与s[i]配对（p[j]为'.'或与s[i]相同），则dp\[i][j]=dp\[i-1][j]（具体逻辑为：字母+'*'的组合相比于遍历到i-1又重复了一次，故为true）
 
   + 如此遍历即可
-
 + 答案为dp\[s.length][p.length]
++ <mark>（2023.10.7第二次更新）</mark>注意两点：1. 一定记得预留s、p前面的空位，且注意p开头是字母+'*'的组合，和空位是可以匹配的；2. 因为dp数组是从前往后更新的，当遍历到p[j]=\'\*'时，只需要考虑dp\[i][j-2]这一个就行了，不需要从头再遍历一遍
++ 类似题目：[44. 通配符匹配](https://leetcode.cn/problems/wildcard-matching)
 
 **视频：**[视频图解 动态规划 正则表达式 - 正则表达式匹配 - 力扣（LeetCode）](https://leetcode.cn/problems/regular-expression-matching/solution/shi-pin-tu-jie-dong-tai-gui-hua-zheng-ze-biao-da-s/)
 
@@ -1630,6 +1731,65 @@ class Solution:
         return nodes
 ```
 
+#### 内向基环树
+
++ 概要：一个有n个节点的有向图，每个节点均有且仅有一条出边指向另一节点，那么这个图一定由若干环+指向环上某节点的枝叶组成。
+
++ 处理思想：用一次拓扑排序剪掉枝叶（经过一次拓扑排序后，所有枝叶入度变为0，环上入度全为1），便于后续处理；同时建立反图，便于从环上到枝叶的遍历
+
+[有向图访问计数](https://leetcode.cn/problems/count-visited-nodes-in-a-directed-graph/)：先用拓扑排序区分枝叶和环；再用反图遍历环，有叶子时即遍历到叶子上
+
+```c++
+class Solution {
+public:
+    vector<int> countVisitedNodes(vector<int>& edges) {
+        int n=edges.size();
+        vector<vector<int>> rg(n);
+        vector<int> deg(n,0);
+        for(int i=0;i<n;i++){
+            rg[edges[i]].push_back(i);
+            deg[edges[i]]++;
+        }
+        queue<int> que;
+        for(int i=0;i<n;i++){
+            if(deg[i]==0){
+                que.push(i);
+            }
+        }
+        while(!que.empty()){
+            int cur=que.front();que.pop();
+            if(--deg[edges[cur]]==0){
+                que.push(edges[cur]);
+            }
+        }
+        vector<int> ans(n,0);
+        function<void(int,int)> rdfs=[&](int x, int depth){
+            ans[x]=depth;
+            for(int next:rg[x]){
+                if(deg[next]==0){
+                    rdfs(next,depth+1);
+                }
+            }
+        };
+        for(int i=0;i<n;i++){
+            if(deg[i]==1){
+                vector<int> ring;
+                for(int x=i;;x=edges[x]){
+                    ring.push_back(x);deg[x]=-1;
+                    if(edges[x]==i){
+                        break;
+                    }
+                }
+                for(int node:ring){
+                    rdfs(node,ring.size());
+                }
+            }
+        }
+        return ans;
+    }
+};
+```
+
 
 
 ### Tarjan算法：
@@ -1811,6 +1971,8 @@ while(!que.empty()){
 }
 ```
 
+BFS提醒：千万要记得开vis数组或者其他方法保证不重复遍历！否则超时！
+
 #### <mark>BFS常用于发掘一条最短的路径</mark>
 
 <mark>这最好别拿递归实现！就用队列！</mark>
@@ -1819,7 +1981,7 @@ while(!que.empty()){
 
 + 二维数组中的BFS模板题：[1926. 迷宫中离入口最近的出口](https://leetcode.cn/problems/nearest-exit-from-entrance-in-maze/) 不要拿dfs的递归来写！遍历过的直接变成墙避免重复遍历（用DFS写的话，复杂的枝可能把简单的路堵上）
 
-```java
+```c++
 int nearestExit(vector<vector<char>>& maze, vector<int>& entrance) {
         int m = maze.size();
         int n = maze[0].size();
@@ -1848,11 +2010,99 @@ int nearestExit(vector<vector<char>>& maze, vector<int>& entrance) {
     }
 ```
 
+**关于此代码的声明：**
+
+变体可以有：
+
+1. 拿dis数组装最短路，que每次push的数组就不用记录距离状态了，vis数组也不需要了
+
+注意：不要忘记队列的pop，不要忘记剪掉已经vis过的状态！
+
+**补充题：**
+
 [码蹄集·BD202301·公园]([码题集OJ-公园 (matiji.net)](https://www.matiji.net/exam/brushquestion/1/4347/179CE77A7B772D15A8C00DD8198AAC74)): 找到两个人一起走的最短路径，这里需要对目的地、两个人分别为中心点做一次BFS，从而找到每个点距离这三者的距离。最后遍历每个点，通过这个点距离三者的距离算出以这个点为交点的结果，并更新答案。
 
+#### BFS寻找带状态的最短路
 
+[864. 获取所有钥匙的最短路径](https://leetcode.cn/problems/shortest-path-to-get-all-keys)：这题的特殊之处在于存在有钥匙和无钥匙两种状态，能到达的范围不一样。因此对每个格子位置应当设置所有的状态（状态总数为2^(场上钥匙数)），某些状态下的移动不能经过某些锁。其余思路不变。
 
-## 还原二叉树
+#### 一种BFS的常见变体：字符变换
+
+[127. 单词接龙](https://leetcode.cn/problems/word-ladder)：这题关键在于如何构建两个单词之间“可以一步转化”。如果暴力枚举两个单词则需o(n^2^·c)时间（c为字符长度），超时。这里很巧妙地将每个字符串的每一个字符均变为'*'一次，将每个这样的新字符串放入图中，便构建了中间节点，用o(n·c)的复杂度建图。之后常规BFS即可。
+
+```java
+class Solution {
+    private Map<String, Integer> wordId;
+    private List<List<Integer>> grid;
+    private int nodeNum;
+    private void addEdge(String str){
+        addWord(str);
+        int id1=wordId.get(str);
+        char[] charArray=str.toCharArray();
+        for(int i=0;i<str.length();i++){
+            char temp=charArray[i];
+            charArray[i]='*';
+            String targetArray=new String(charArray);
+            addWord(targetArray);
+            int id2=wordId.get(targetArray);
+            grid.get(id1).add(id2);
+            grid.get(id2).add(id1);
+            charArray[i]=temp;
+        }
+    }
+    private void addWord(String word){
+        if(!wordId.containsKey(word)){
+            wordId.put(word, nodeNum++);
+            grid.add(new ArrayList<Integer>());
+        }
+    }
+    public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+        int n=wordList.size();
+        nodeNum=0;
+        this.grid = new ArrayList<List<Integer>>();
+        this.wordId = new HashMap<String, Integer>();
+        addEdge(beginWord);
+        for(int i=0;i<n;i++){
+            addEdge(wordList.get(i));
+        }
+        if(!wordId.containsKey(endWord)){
+            return 0;
+        }
+        Queue<Integer> que=new LinkedList<Integer>();
+        List<Integer> dis=new ArrayList<Integer>();
+        List<Boolean> vis=new ArrayList<Boolean>();
+        for(int i=0;i<nodeNum;i++){
+            dis.add(0);
+            vis.add(false);
+        }
+        dis.set(0,0);
+        que.offer(wordId.get(beginWord));
+        while(!que.isEmpty()){
+            int cur=que.peek();que.poll();
+            vis.set(cur,true);
+            int dist=dis.get(cur);
+            for(int next:grid.get(cur)){
+                if(!vis.get(next)){
+                    dis.set(next,dist+1);
+                    que.offer(next);
+                }
+            }
+        }
+        if(!vis.get(wordId.get(endWord))){
+            return 0;
+        }
+        return dis.get(wordId.get(endWord))/2+1;
+    }
+}
+```
+
+## 树
+
+### 前序、中序、后序遍历
+
+# #########待施工########
+
+### 还原二叉树
 
 [106. 从中序与后序遍历序列构造二叉树](https://leetcode.cn/problems/construct-binary-tree-from-inorder-and-postorder-traversal/):
 
@@ -1962,6 +2212,8 @@ public class Codec {
 
 [979. 在二叉树中分配硬币](https://leetcode.cn/problems/distribute-coins-in-binary-tree/)：DFS，注意答案是每棵子树的硬币树和节点数之差绝对值的和
 
+[41. 缺失的第一个正数](https://leetcode.cn/problems/first-missing-positive)：只允许常数级别额外空间，原地哈希
+
 # 常见约束（C++版）
 
 1.爆int（注意两个int相加再赋值给long long也会爆，需要先强制类型转换）
@@ -1969,3 +2221,5 @@ public class Codec {
 2.数组越界，判断条件里加
 
 3.数组长度很短的时候需要先在最开始return一下结果
+
+4.很多遍历图记得考虑如何区分已遍历/未遍历！不然很容易爆内存/时间！
