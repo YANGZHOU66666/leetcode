@@ -177,3 +177,13 @@ multiset的用法，有一些难度的模拟题：[2034. 股票价格波动](htt
 ### 2023.10.11
 
 c++：substr的用法混了
+
+### 2023.10.16
+
+三条关于位运算的题目均不会写：
+
+[136. 只出现一次的数字](https://leetcode.cn/problems/single-number)
+
+[137. 只出现一次的数字 II](https://leetcode.cn/problems/single-number-ii)
+
+[260. 只出现一次的数字 III](https://leetcode.cn/problems/single-number-iii)

@@ -1269,6 +1269,12 @@ for(int k=i+1;k<j;k++){
 
 注意到每次更新dp\[i][j]时需要用到dp\[i][k]和dp\[k][j]，其中i<k<j，故i需要从后向前枚举，j需要从前往后枚举
 
+#### 区间DP和回文串
+
+结论：用o(n^2^)的复杂度可以计算出一个长字符串的每个子字符串是不是回文串
+
+[132. 分割回文串 II](https://leetcode.cn/problems/palindrome-partitioning-ii)：先用上述结论将每个子串是否为回文串计算出，然后用线性dp从0到n正常递推即可
+
 ### 状态机DP(以股票问题为代表)
 
 [122. 买卖股票的最佳时机 II](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii/)：（模板题）
@@ -2201,6 +2207,18 @@ public class Codec {
 ## 最大矩形面积问题：常转化为高度数组
 
 [85. 最大矩形](https://leetcode.cn/problems/maximal-rectangle)：将每个坐标处的从之开始的向上的连续1的个数存到数组里，那么每一行的数据就可以转化为84题（高度数组求最大矩形）的做法，用单调栈即可
+
+## 位运算
+
+### 异或性质：偶数个相同为0，奇数个相同得自己
+
+[136. 只出现一次的数字](https://leetcode.cn/problems/single-number?envType=daily-question&envId=2023-10-14)
+
++ 几道暂时不能归类的题：
+
+[260. 只出现一次的数字 III](https://leetcode.cn/problems/single-number-iii?envType=daily-question&envId=2023-10-16)：分组异或，每组各有一个目标值和其他成对的值
+
+[137. 只出现一次的数字 II](https://leetcode.cn/problems/single-number-ii)：每个位模三，算出目标值在该位上是0还是1
 
 ## 思路特殊的题目积累：
 

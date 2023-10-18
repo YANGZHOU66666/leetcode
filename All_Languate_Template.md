@@ -57,6 +57,9 @@ List<List<Integer> lis=new ArrayList<List<Integer>>();
 lis.sort((x, y)-> {return x.get(1)-y.get(1);});//按照索引为1的值升序排序
 //还可以写为：
 lis.sort((x, y) -> x.get(1)-y.get(1));//也是按索引为1的值升序排序
+//对列表排序的另一种写法：
+Collections.sort(lis);
+Collections.sort(lis.subList(1,4));//对列表一部分排序
 ```
 
 #### C++:
@@ -375,11 +378,25 @@ unordered_set<int> set = {9,5,9,8,1,2,3,5,6,1,2,3,4,5,6,7,4,3,3};
                 cout<<*it<<" ";
 ```
 
-### JavaScript: Set
+#### JavaScript: Set
 
 ```javascript
 let set=new Set();
 ```
+
+#### Java: HashSet
+
+```java
+HashSet<Integer> hSet=new HashSet<Integer>();
+hSet.add(1);//添加某元素
+hSet.add(2);
+hSet.add(3);
+hSet.contains(1);//判断是否有某元素
+hSet.remove(2);//移除元素
+hSet.clear();//清空集合
+```
+
+
 
 ### 字典（Dict）
 
