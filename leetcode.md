@@ -1,15 +1,3 @@
-# Tips
-
-1. leetcode不能用sizeof()算数组长度，可能原因是把数组名解释为指针
-
-# 思考
-
-## 什么情况适合使用一个优先队列？
-
-总需要一个容器中“最大”“最小”，且有其他的小操作不影响之前维护好的队列，（那么就不需要多次排序）便于维护好这样一个堆
-
-例：[Q2530执行 K 次操作后的最大分数](https://leetcode.cn/problems/maximal-score-after-applying-k-operations/)、[414. 第三大的数](https://leetcode.cn/problems/third-maximum-number/)（也可以算）
-
 # 题型合集
 
 ## 排序
@@ -593,9 +581,54 @@ public:
 
 ### 两个堆维护中位数：
 
-[295. 数据流的中位数](https://leetcode.cn/problems/find-median-from-data-stream)：
+[295. 数据流的中位数](https://leetcode.cn/problems/find-median-from-data-stream)：维护两个堆，一个大根堆负责维护数据中较小的一部分，一个小根堆负责维护数据中较大的一部分；对每个新进来的数，使其与两个堆堆顶的大小比较，并依次决定该数应该放到哪个堆中。若两个堆元素数量差值大于1，则将数量多的堆的堆顶放入数量少的堆。
 
-# ##########待施工##########
+```c++
+class MedianFinder {
+    priority_queue<int,vector<int>,less<int>> lower;
+    priority_queue<int,vector<int>,greater<int>> upper;
+public:
+    MedianFinder() {
+        ;
+    }
+    
+    void addNum(int num) {
+        if(lower.size()==upper.size()){
+            if(lower.size()==0){
+                lower.push(num);
+                return;
+            }
+            if(num>=upper.top()){
+                lower.push(upper.top());
+                upper.pop();
+                upper.push(num);
+                return;
+            }else{
+                lower.push(num);
+                return;
+            }
+        }else{
+            if(num>lower.top()){
+                upper.push(num);
+                return;
+            }
+            upper.push(lower.top());
+            lower.pop();
+            lower.push(num);
+            return;
+        }
+    }
+    
+    double findMedian() {
+        if(lower.size()-upper.size()==1){
+            return (double)lower.top();
+        }
+        return ((double)lower.top()+(double)upper.top())/2;
+    }
+};
+```
+
+
 
 ### 配合哈希表实现“每次取最大+延后删除”：
 
@@ -1199,6 +1232,32 @@ class Solution {
         }
     }
 }
+```
+
+### 思考：正向DP和反向DP
+
+有时，从正向递推到某处不能判断某个解是否是最优的（可以理解为，状态转移方程在i后面的情况未知时，无法推出；也即不满足“无后效性”）此时，可以考虑从反向递推
+
+[174. 地下城游戏](https://leetcode.cn/problems/dungeon-game)：
+
+本题如果从(0, 0)位置开始正向递推，由于遍历到格子(i,j)时，每条路后面的格子具体情况未知，无法判断哪个是最优解，也就无法进行每一步递推。这里从最后一个格子向前推，得出每个格子到最后一个格子所需的最大生命值，一步步推到(0,0)
+
+```c++
+class Solution {
+public:
+    int calculateMinimumHP(vector<vector<int>>& dungeon) {
+        int n = dungeon.size(), m = dungeon[0].size();
+        vector<vector<int>> dp(n + 1, vector<int>(m + 1, INT_MAX));
+        dp[n][m - 1] = dp[n - 1][m] = 1;
+        for (int i = n - 1; i >= 0; --i) {
+            for (int j = m - 1; j >= 0; --j) {
+                int minn = min(dp[i + 1][j], dp[i][j + 1]);
+                dp[i][j] = max(minn - dungeon[i][j], 1);
+            }
+        }
+        return dp[0][0];
+    }
+};
 ```
 
 ### 子序列问题
@@ -2102,6 +2161,12 @@ class Solution {
 }
 ```
 
+#### 2023.10.21更新：BFS的一个弊端
+
+在非探究最短路问题中，有时会拿BFS来遍历整个图。这时如果每次出队列时才更新vis数组的状态，可能会导致同一层的两个节点后面都连接某个点node，这样由于vis[node]在找这两个节点的下一层的for循环中均为false，故node会两次进队列，造成多余。
+
+[2316. 统计无向图中无法互相到达点](https://leetcode.cn/problems/count-unreachable-pairs-of-nodes-in-an-undirected-graph?envType=daily-question&envId=2023-10-21)
+
 ## 树
 
 ### 前序、中序、后序遍历
@@ -2194,13 +2259,145 @@ public class Codec {
 
 + 大致思路：将一个大集合分堆，用一个链表指明某个头元素的根节点在哪里，根节点相同的元素属于同一堆
 
+并查集模板：
+
+```c++
+class UnionFind{
+    vector<int> parent;
+    UnionFind(int n){
+        parent.resize(n);
+        for(int i=0;i<n;i++){
+            parent[i]=i;
+        }
+    }
+    int union_set(int index1,int index2){//将index1对应的集合和index2对应的集合合并
+        parent[find(index2)]=parent[find(index1)];//这里为什么用find? 可能index2或index1的直系父亲还没有被更新为根节点；同时保证index2的所有祖先都指向根节点,index1的所有祖先都指向根节点
+    }
+    int find(int index){
+        if(parent[index]!=index){
+            parent[index]=find(parent[index]);//递归实现一直向上找，并将每个路过的节点的parent设为对应的根节点
+        }
+        return parent[index];
+    }
+};
+```
+
+[721. 账户合并](https://leetcode.cn/problems/accounts-merge)：**并查集模板题**
+
+首先遍历每一个账户，每一个账户内先合并成一个小并查集；再遍历所有邮箱，find每个邮箱的根，把还没连完全的连好；最后把所有根相同的放到一个数组里，排序
+
+```c++
+class UnionFind {
+public:
+    vector<int> parent;
+
+    UnionFind(int n){
+        parent.resize(n);
+        for(int i=0;i<n;i++){
+            parent[i]=i;
+        }
+    }
+    void UnionSet(int index1,int index2){//将1的根赋给2的根->2合并到1下面
+        parent[find(index2)]=find(index1);
+    }
+    int find(int index){//找index的根，同时将所有路径上经过的点的根都标好
+        if(parent[index]!=index){
+            parent[index]=find(parent[index]);
+        }
+        return parent[index];
+    }
+};
+
+class Solution {
+
+public:
+    vector<vector<string>> accountsMerge(vector<vector<string>>& accounts) {
+        map<string,int> email_index;
+        map<string,string> email_name;
+        int index=0;
+        for(auto account:accounts){
+            string name=account[0];
+            int n=account.size();
+            for(int i=1;i<n;i++){
+                string email=account[i];
+                if(!email_index.count(email)){
+                    email_index[email]=index++;
+                    email_name[email]=name;
+                }
+            }
+        }
+        UnionFind uf(index);
+        for(auto account: accounts){
+            string firstEmail=account[1];
+            int firstIndex=email_index[firstEmail];
+            int size=account.size();
+            for(int i=2;i<size;i++){
+                string nextEmail=account[i];
+                int nextIndex=email_index[nextEmail];
+                uf.UnionSet(firstIndex,nextIndex);
+            }
+        }
+        map<int,vector<string>> index_emails;
+        for(auto& [email,_]:email_index){
+            int index=uf.find(email_index[email]);
+            vector<string>& account=index_emails[index];
+            account.push_back(email);
+            index_emails[index]=account;
+        }
+        vector<vector<string>> merged;
+        for(auto& [_,emails]:index_emails){
+            sort(emails.begin(),emails.end());
+            string& name=email_name[emails[0]];
+            vector<string> account;
+            account.push_back(name);
+            for(auto email:emails){
+                account.push_back(email);
+            }
+            merged.push_back(account);
+        }
+        return merged;
+    }
+};
+```
+
+
+
 [2382. 删除操作后的最大子段和](https://leetcode.cn/problems/maximum-segment-sum-after-removals/)：不典型的并查集题目
 
-# ##########(待施工)##########
+**一个额外要点：注意可以逆向思维从数组反向开始加**
+
+注意到这点后，就是常规的并查集题目。注意到这里的union_set函数不用写，每个节点i的直系父亲可以设为它右边的节点i+1，故其根节点就是它右边的节点i+1的根节点to；合并完成后再将sums[to]更新为sums[to]+sums[i]+nums[i]。这里sums[i]就不会用到了，因为根已经变成to了，故不用更新sums[i]
+
+```c++
+class Solution {
+public:
+    vector<long long> maximumSegmentSum(vector<int> &nums, vector<int> &removeQueries) {
+        int n = nums.size();
+        int fa[n + 1];
+        iota(fa, fa + n + 1, 0);
+        long long sum[n + 1];
+        memset(sum, 0, sizeof(sum));
+        function<int(int)> find = [&](int x) -> int { return fa[x] == x ? x : fa[x] = find(fa[x]); };
+
+        vector<long long> ans(n);
+        for (int i = n - 1; i > 0; --i) {
+            int x = removeQueries[i];
+            int to = find(x + 1);
+            fa[x] = to; // 合并 x 和 x+1
+            sum[to] += sum[x] + nums[x];
+            ans[i - 1] = max(ans[i], sum[to]);
+        }
+        return ans;
+    }
+};
+//(抄自灵神题解)
+```
+
+
 
 ## 状态机
 
-### ######## 待施工 ########
+### ######## 待施工######## ########
 
 [8. 字符串转换整数 (atoi)](https://leetcode.cn/problems/string-to-integer-atoi/)
 
@@ -2219,6 +2416,18 @@ public class Codec {
 [260. 只出现一次的数字 III](https://leetcode.cn/problems/single-number-iii?envType=daily-question&envId=2023-10-16)：分组异或，每组各有一个目标值和其他成对的值
 
 [137. 只出现一次的数字 II](https://leetcode.cn/problems/single-number-ii)：每个位模三，算出目标值在该位上是0还是1
+
+## 数学
+
+### 算最大公约数
+
+```c++
+int gcd(int x,int y){
+    return y?gcd(y,x%y):x;
+}
+```
+
+
 
 ## 思路特殊的题目积累：
 

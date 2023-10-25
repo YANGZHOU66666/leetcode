@@ -36,6 +36,8 @@ arr1.sort();
 arr2=[2,4,5,2,4];
 arr2.sort(function(a,b){return a-b});//升序排序是a-b
 arr2.sort(function(a,b){return b-a});//降序排序是b-a
+//或：
+arr2.sort((a,b)=>a-b);
 //自定义排序：
 var users = [{name:"张三",age:20},{name:"李四",age:5},{name:"王五",age:10},{name:"赵六",age:8}];
 //userA.age - userB.age 按照年龄升序排序
@@ -103,6 +105,7 @@ sort(grid.begin(),grid.end(),cmp);
 
 ```javascript
 function(a,b){return a-b;}
+(a,b)=>{return a-b;}
 ```
 
 ### filter
