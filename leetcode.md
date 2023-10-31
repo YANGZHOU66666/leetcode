@@ -877,7 +877,7 @@ class Solution:
         return ans
 ```
 
-
++ **2023.10.27更新：似乎有些生疏，需要复习了**
 
 + 进阶：[51. N 皇后](https://leetcode.cn/problems/n-queens/)：
 
@@ -942,13 +942,39 @@ class Solution:
 
 ### 组合型回溯
 
-# #############################待施工###############################
+[77. 组合](https://leetcode.cn/problems/combinations)：由于组合是任选其中几个数字但任意顺序均可的，故可指定要返回的每个集合都按从小到大排序（这样可以避免重复）
 
-### 剪枝：
+这样，从1开始枚举，决定每个数字”选“还是”不选“，选就放进path里。每当path长度达到k，就放进答案中。
+
+```javascript
+var combine = function(n, k) {
+    path=[];
+    ans=[];
+    function dfs(i){//i表示枚举到哪个数字了
+        if(path.length==k){//如果长度为k，直接放进答案
+            ans.push(path.concat());//.concat()是为了深拷贝path，与python的copy()类似
+            return;
+        }
+        for(let j=i+1;j<=n;j++){//枚举下一个要选的数
+            path.push(j);
+            dfs(j);
+            path.pop();
+        }
+    }
+    dfs(0);
+    return ans;
+};
+```
+
+
+
+### 回溯+剪枝
 
 > 一些问题不需要将所有情况回溯一遍，一些不可能实现的结果直接return掉
 
-+ 方法：
+# ############ 待施工 ############ ############
+
+[212. 单词搜索 II](https://leetcode.cn/problems/word-search-ii)
 
 ## 记忆化搜索/动态规划
 
@@ -1456,7 +1482,42 @@ public:
 
 [834. 树中距离之和](https://leetcode.cn/problems/sum-of-distances-in-tree/)：
 
-# #########待施工##########
+首先，任找一节点（为了方便一般选0节点）作为根节点算出其到每个节点的距离之和（复杂度o(n)），然后从该点开始进行换根DP。根节点每移动一次后，相对它之前的那个节点prev，在prev这一侧的每个节点的距离都加一，而反方向的每个节点的距离都减一
+
+```javascript
+var sumOfDistancesInTree = function(n, edges) {
+    let size=new Array(n).fill(1);
+    let ans=new Array(n).fill(0);
+    let tree = Array(n).fill(null).map(() => []); // tree[x] 表示 x 的所有邻居
+    for (const [x, y] of edges) {
+        tree[x].push(y);
+        tree[y].push(x);
+    }
+    let dfs=function(i,fa,depth){//这一次dfs同时算出每个子树的节点个数（size）和节点0到各个节点的距离之和（用depth计算）
+        ans[0]+=depth;
+        for(const j of tree[i]){
+            if(j!=fa){
+                dfs(j,i,depth+1);
+                size[i]+=size[j];
+            }
+        }
+    };
+    dfs(0,-1,0);
+    let dfs2=function(i,fa){
+        for(const j of tree[i]){
+            if(j!=fa){
+
+                ans[j]=ans[i]+n-size[j]*2;
+                dfs2(j,i);
+            }
+        }
+    }
+    dfs2(0,-1);
+    return ans;
+};
+```
+
+
 
 ## 动态规划题目积累：
 
@@ -2255,6 +2316,40 @@ public class Codec {
 }
 ```
 
+## 树、图特殊题目积累
+
+[979. 在二叉树中分配硬币](https://leetcode.cn/problems/distribute-coins-in-binary-tree)：
+
+注意到，任取一条边将树分成两个部分，则通过这条边的硬币数必须使得两个部分的硬币数和其节点数相等。移动次数等于所有边的通过数。这样通过树形DP就很容易算了
+
+```javascript
+var distributeCoins = function(root) {
+    let n=0;
+    function dfs(r){
+        if(r==null){
+            return;
+        }
+        n++;
+        dfs(r.left);
+        dfs(r.right);
+    };
+    dfs(root);
+    let ans=0;
+    function helper(r){
+        if(r==null){
+            return [0,0];//nodeNums, coinNums
+        }
+        let lef=helper(r.left);
+        let rig=helper(r.right);
+        ans+=Math.abs(lef[0]-lef[1]);
+        ans+=Math.abs(rig[0]-rig[1]);
+        return [lef[0]+rig[0]+1,lef[1]+rig[1]+r.val];
+    };
+    helper(root);
+    return ans;
+};
+```
+
 ## 并查集
 
 + 大致思路：将一个大集合分堆，用一个链表指明某个头元素的根节点在哪里，根节点相同的元素属于同一堆
@@ -2394,12 +2489,6 @@ public:
 ```
 
 
-
-## 状态机
-
-### ######## 待施工######## ########
-
-[8. 字符串转换整数 (atoi)](https://leetcode.cn/problems/string-to-integer-atoi/)
 
 ## 最大矩形面积问题：常转化为高度数组
 

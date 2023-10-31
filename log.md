@@ -187,3 +187,11 @@ c++：substr的用法混了
 [137. 只出现一次的数字 II](https://leetcode.cn/problems/single-number-ii)
 
 [260. 只出现一次的数字 III](https://leetcode.cn/problems/single-number-iii)
+
+### 2023.10.31
+
+今日难题：
+
+[2003. 每棵子树内缺失的最小基因值](https://leetcode.cn/problems/smallest-missing-genetic-value-in-each-subtree?envType=daily-question&envId=2023-10-31)
+
+从1开始向上递推的巧妙优化没想到，从叶子开始递推又过于烦。

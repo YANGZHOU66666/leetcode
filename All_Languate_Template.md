@@ -45,6 +45,10 @@ users.sort(function(userA, userB){return userA.age - userB.age});
 //总之，自定义函数，然后升序用a-b，降序用b-a
 ```
 
+##### Warning: 
+
+<mark>Js对所有东西排序都是转换成字符串后字典序，故对数字数组无法直接sort，必须增加上述参数(a,b)=>{return func(a,b)}</mark>
+
 #### Java:
 
 ```java
@@ -586,6 +590,19 @@ priority_queue<int, vector<int>, less<int> > q;//大根
 priority_queue<double, vector<double>, greater<double>> q;//小根
 ```
 
+#### Java: PriorityQueue
+
+```java
+PriorityQueue<Integer> pq=new PriorityQueue<Integer>();//默认小根堆
+pq.add(0);//添加元素
+pq.offer(1);//添加元素
+pq.poll();//弹出堆顶
+pq.peek();//看堆顶
+pq.isEmpty();//是否为空
+//自定义排序：
+PriorityQueue<Integer> pq=new PriorityQueue<Integer>((a,b)->b-a);//大根堆
+```
+
 
 
 ### 各种基础类型互相转化
@@ -653,6 +670,16 @@ let arr2=arr1.filter(item => {
 1. i%2不能直接当成判定条件，需为i%2==1(可能是java不能int转boolean?)
 2. 注意int和long必须得用强制类型转换，不能隐式转换
 ```
+
+#### JavaScript:
+
+Number类型只能支持53位精度。故如果要实现和c++ long long这种更长的整数，需要用BigInt
+
+```c++
+BigInt(a)*BigInt(b)//等等
+```
+
+
 
 ### 其他：
 
