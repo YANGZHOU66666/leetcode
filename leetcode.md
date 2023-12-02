@@ -972,7 +972,7 @@ var combine = function(n, k) {
 
 > 一些问题不需要将所有情况回溯一遍，一些不可能实现的结果直接return掉
 
-# ############ 待施工 ############ ############
+# ############ 待施工 ############
 
 [212. 单词搜索 II](https://leetcode.cn/problems/word-search-ii)
 
