@@ -1,3 +1,5 @@
+# ALL LANGUAGE TEMPLATE
+
 ### max(a,b)
 
 C++:
@@ -71,6 +73,7 @@ Collections.sort(lis.subList(1,4));//对列表一部分排序
 #### C++:
 
 ```c++
+#include<algorithm>
 vector<int> arr;
 arr.push_back(2);
 arr.push_back(4);
@@ -323,7 +326,23 @@ stk.pop();
 
 ### 双端队列（Deque）
 
+#### C++
 
+```c++
+#include<deque>
+
+queue<int>q;
+
+// 常用函数： front指队头，back指队尾（新插入的）
+q.push_back(num);
+q.push_front(num);
+q.pop_back();
+q.pop_front();
+int num=q.front();
+int num=q.back();
+int n=q.size();
+bool flag=q.empty();
+```
 
 ### 队列（Queue）
 
@@ -358,6 +377,7 @@ que.length==0//判断是否为空
 #### C++:
 
 ```c++
+
 queue<tuple<int,int,int>> que;
 que.emplace(1,2,3);
 que.emplace(3,2,5);
@@ -389,6 +409,17 @@ unordered_set<int> set = {9,5,9,8,1,2,3,5,6,1,2,3,4,5,6,7,4,3,3};
 
 ```javascript
 let set=new Set();
+set.add(1);
+set.add(2);
+set.add(3);
+if(set.has(2)){
+    set.delete(2);
+}
+set.add(4);
+set.forEach(e=>{
+    //do something
+});
+set.clear();
 ```
 
 #### Java: HashSet
@@ -577,6 +608,7 @@ str2.trim();//去除开头结尾的空白
 #### C++: priority_queue
 
 ```c++
+# include<queue> 
 priority_queue<int> q;//默认大根堆
 q.push();//插入元素
 q.pop();//弹出元素
@@ -679,7 +711,51 @@ Number类型只能支持53位精度。故如果要实现和c++ long long这种�
 BigInt(a)*BigInt(b)//等等
 ```
 
+### Math
 
+#### C++
+
+```c++ 
+#include<cmath>
+
+int abs(int i);//返回整型参数i的绝对值
+double fabs(double x);//返回双精度参数x的绝对值
+long labs(long n);//返回长整型参数n的绝对值
+
+
+double exp(double x);//返回指数函数e^x的值
+double log(double x);//返回logex的值
+double log10(double x) //返回log10x的值
+double pow(double x,double y) //返回x^y的值
+double pow10(int p) //返回10^p的值
+
+
+double sqrt(double x) //返回+√x的值
+
+
+double acos(double x) //返回x的反余弦arccos(x)值,x为弧度
+double asin(double x) //返回x的反正弦arcsin(x)值,x为弧度
+double atan(double x) //返回x的反正切arctan(x)值,x为弧度
+double cos(double x) //返回x的余弦cos(x)值,x为弧度
+double sin(double x) //返回x的正弦sin(x)值,x为弧度
+double tan(double x) //返回x的正切tan(x)值,x为弧度
+
+
+double hypot(double x,double y) //返回直角三角形斜边的长度(z),x和y为直角边的长度,z^2=x^2+y^2
+
+
+double ceil(double x) //返回不小于x的最小整数
+double floor(double x) //返回不大于x的最大整数
+
+
+int rand() //产生一个随机数并返回这个数
+
+srand(time(NULL));//srand 设置随机种子
+double atof(char *nptr) //将字符串nptr转换成浮点数并返回这个浮点数
+double atol(char *nptr) //将字符串nptr转换成长整数并返回这个整数
+double atof(char *nptr) //将字符串nptr转换成双精度数,并返回这个数,错误返回0
+int atoi(char *nptr) //将字符串nptr转换成整型数, 并返回这个数,错误返回0
+```
 
 ### 其他：
 
