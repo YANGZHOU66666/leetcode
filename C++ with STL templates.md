@@ -21,12 +21,12 @@ grid.push_back([1,3]);
 sort(grid.begin(),grid.end());//二维数组按照数组元素的第一个数字从小到大排序
 //自定义排序：（优先队列的自定义排序也可以这么写）
 struct cmp{
-bool operator()(vector<int>& a, vector<int>&b){//这里的两个参数随机应变
-    return a[1]<b[1];//按照a、b数组的第二个元素从小到大排序
-    //a<b: 从小到大;a>b: 从大到小
-}
-}
-sort(grid.begin(),grid.end(),cmp);
+	bool operator()(vector<int>& a, vector<int>&b){//这里的两个参数随机应变
+    	return a[1]<b[1];//按照a、b数组的第二个元素从小到大排序
+    	//a<b: 从小到大;a>b: 从大到小
+	}
+};
+sort(grid.begin(),grid.end(),cmp());
 ```
 ### vector
 ```cpp
@@ -66,11 +66,11 @@ return vector<int>(0);
 官方给的默认链表格式，自己也要会写
 ```cpp
 struct ListNode{
-int val;
-ListNode* next;
-ListNode(): val(0), next(nullptr){}
-ListNode(int v): val(v), next(nullptr){}
-ListNode(int v, ListNode* nex):val(v), next(nex){}
+    int val;
+    ListNode* next;
+    ListNode(): val(0), next(nullptr){}
+    ListNode(int v): val(v), next(nullptr){}
+    ListNode(int v, ListNode* nex):val(v), next(nex){}
 };
 ```
 ### stack

@@ -91,8 +91,8 @@ struct cmp{
         return a[1]<b[1];//按照a、b数组的第二个元素从小到大排序
                          //a<b: 从小到大;a>b: 从大到小
     }
-}
-sort(grid.begin(),grid.end(),cmp);
+};
+sort(grid.begin(),grid.end(),cmp());
 ```
 
 <mark>这里需要特别注意，自定义排序c++是用小于和大于来写，Java和JavaScript是用减号来写</mark>

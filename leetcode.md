@@ -1,5 +1,7 @@
 # 题型合集
 
+[TOC]
+
 ## 排序
 
 ### 快速排序
@@ -744,8 +746,6 @@ int quick_add(int x,int y){//return x*y
 }
 ```
 
-
-
 ## 递归
 
 + 递归基本思路：
@@ -1292,6 +1292,8 @@ public:
 
 [1027. 最长等差数列](https://leetcode.cn/problems/longest-arithmetic-subsequence/)：
 
+# ##########待施工##########
+
 ### 区间DP
 
 区间DP和线性DP的区别：线性DP在前缀/后缀上转移；区间DP从小区间转移到大区间
@@ -1587,6 +1589,84 @@ public int maxSumTwoNoOverlap(int[] nums, int firstLen, int secondLen) {
     return dp3[nums.length];
 }
 ```
+
+[1696. 跳跃游戏 VI](https://leetcode.cn/problems/jump-game-vi?envType=daily-question&envId=2024-02-05)：或许可以代表状态转移方程为`dp[i]=dp前k项的最值+nums[i]`这一类的动态规划问题
+
+可以用一个priority_queue配合滑动窗口思想维护前k项的最值
+
+```c++
+int maxResult(vector<int>& nums, int k) {
+    int n=nums.size();
+    priority_queue<pair<int,int>> pq;//pair<得分,下标>
+    vector<int> dp(n,0);
+    dp[0]=nums[0];
+    pq.push(make_pair(dp[0],0));
+    for(int i=1;i<n;i++){
+        auto best=pq.top();
+        while(best.second<i-k){
+            pq.pop();
+            best=pq.top();
+        }
+        dp[i]=nums[i]+best.first;
+        pq.push(make_pair(dp[i],i));
+    }
+    return dp[n-1];
+}
+```
+
+
+
+## 字符串相关
+
+### Z函数（扩展KMP）
+
++ **基础用法：**计算字符串`str[0,n)`中间每个点i（0<i<n）起始的与该字符串前缀重合的字符串长度
+
+如：`Z("aaabaab")=[0,2,1,0,2,1,0]`
+
+实现：易见朴素的做法复杂度是O(n<sup>2</sup>)的
+
++ 这里提供O(n)的做法：
+
+1. 初始化l,r，从1至n-1遍历整个字符串，维护l和r为当前遍历到的位置中，r最大的、与前缀重合的子串下标
+
+   如上述`"aaabaab"`，当枚举i==4结束时，l=4，r=5
+
+2. 枚举i时，如果i在`[l,r]`的范围内，由于`[l,r]`与`[0,r-l]`是一样的，故`[i,r]`段与前缀重合的部分必与`[i-l,r-l]`相同，那么现在获取`Z[i-l]`，如果`Z[i-l]<r-i+1`，可直接获取`Z[i]=Z[i-l]`而不用一个个比较；如果`Z[i-l]>=r-i+1`，也会有`[i,r]`段和`[i-l,r-l]`相同，这一段也不需要重复比较了。直接比较r后面的即可，如果r后面还有与前缀重合的，更新l和r。
+
+3. 枚举i时，如果i不在`[l,r]`范围内，则需要从i开始与前缀比较。如果有与前缀重合区间记得更新l和r
+
++ **code：**
+
+```c++
+vector<int> z_function(string& s){
+    int n=s.length();
+    vector<int> z(n,0);
+    int l=0,r=0;
+    for(int i=1;i<n;i++){
+        if(i<=r&&z[i-l]<r-i+1){
+            z[i]=z[i-l];
+        }else{
+            z[i] = max(0, r - i + 1);//看i后面是否有之前已经算的和前缀重合的部分
+      		while (i + z[i] < n && s[z[i]] == s[i + z[i]])//枚举r之后的部分
+            {
+                ++z[i];
+            }
+            if(i+z[i]-1>r){//如果比较到r之后的值了，更新r
+                r=i+z[i]-1;
+                l=i;
+            }
+        }
+    }
+    return z;
+}
+```
+
++ 时空复杂度均为`O(n)`
+
+例题：[将单词恢复初始状态所需的最短时间 II](https://leetcode.cn/problems/minimum-time-to-revert-word-to-initial-state-ii/)
+
+注意到，该题等价于需要找到按题示操作t次后，剩余字符串（没被前面砍掉的）刚好为原字符串的前缀，答案为t. 如果一直到原字符串全被移除都找不到满足上述要求的前缀，答案即为移除原字符串的操作次数（因后面的可以自己任意加）。明白这点，解题是自然的
 
 ## 图
 
@@ -1973,6 +2053,61 @@ public:
     }
 };
 ```
+
+### 最短路相关
+
+#### Dijkstra
+
+定义略
+
+例题：[1976. 到达目的地的方案数](https://leetcode.cn/problems/number-of-ways-to-arrive-at-destination?envType=daily-question&envId=2024-03-05).
+
+思路是以0为起点跑一个`dijkstra`，同时记录到每个点的最短路径数，路径数的记录有一定记忆化搜索的思维（每算出一个最短路径的点都会把它 的邻居更新）
+
+（略匆忙，直接抄题解了，注意priority_queue即便是复杂的pair也可以用greater<pair<long long, int>>，另外注意emplace的用法）
+
+```c++
+class Solution {
+public:
+    using LL = long long;
+    int countPaths(int n, vector<vector<int>>& roads) {
+        const long long mod = 1e9 + 7;
+        vector<vector<pair<int, int>>> e(n);
+        for (const auto& road : roads) {
+            int x = road[0], y = road[1], t = road[2];
+            e[x].emplace_back(y, t);
+            e[y].emplace_back(x, t);
+        }
+        vector<long long> dis(n, LLONG_MAX);
+        vector<long long> ways(n);
+
+        priority_queue<pair<LL, int>, vector<pair<LL, int>>, greater<pair<LL, int>>> q;//注意这里
+        q.emplace(0, 0);//也注意这里
+        dis[0] = 0;
+        ways[0] = 1;
+        
+        while (!q.empty()) {
+            auto [t, u] = q.top();
+            q.pop();
+            if (t > dis[u]) {
+                continue;
+            }
+            for (auto &[v, w] : e[u]) {
+                if (t + w < dis[v]) {
+                    dis[v] = t + w;
+                    ways[v] = ways[u];
+                    q.emplace(t + w, v);//这里
+                } else if (t + w == dis[v]) {
+                    ways[v] = (ways[u] + ways[v]) % mod;
+                }
+            }
+        }
+        return ways[n - 1];
+    }
+};
+```
+
+
 
 ## DFS
 
