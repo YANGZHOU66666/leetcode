@@ -14,6 +14,7 @@ arr.push_back(4);
 arr.push_back(3);
 arr.push_back(7);
 sort(arr.begin(),arr.end());//默认从小到大排序
+sort(nums.begin(),nums.end(),greater<int>());//从大到小排序
 vector<vector<int>> grid;
 grid.push_back([3,2]);
 grid.push_back([5,3]);

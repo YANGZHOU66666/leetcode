@@ -2666,6 +2666,38 @@ public:
 
 
 
+## priority_queue相关问题
+
+### 单调非减、非负整数数组的第k小的子序列和
+
+思路：注意从小到大的顺序，依次是`nums[0], nums[1]`, `min(nums[0]+nums[1], nums[2])`, `max(nums[0]+nums[1], nums[2])`, ...
+
+注意到，对每个当前的最小值(val, i)`(val代表当前值，i代表这个子序列的最后一个数为nums[i])`，放入`(val+nums[i+1], i+1)`, `(val+nums[i+1],i+1)`，那么下一个最小值一定会在优先队列里，这样就可以进行递推更新了。
+
+```c++
+vector<int> nums;//单调非减、非负整数数组
+int k;//要求第k小的子序列和
+if(k==1){
+    return 0;//每个元素都不拿也是一种子序列
+}
+priority_queue<pair<int,int>> pq;
+pq.emplace(nums[0],0);
+for(int i=1;i<k;i++){
+    auto cur=pq.top();pq.pop();
+    if(i==k-1){
+        return cur.first;
+    }
+    int nex=cur.second+1;
+    if(nex>=n){
+        continue;//避免数组越界情况
+    }
+    pq.push(cur.first+nums[nex],nex);
+    pq.push(cur.first+nums[nex]-nums[nex-1],nex);
+}
+```
+
+案例：[2386. 找出数组的第 K 大和](https://leetcode.cn/problems/find-the-k-sum-of-an-array?envType=daily-question&envId=2024-03-09).
+
 ## 最大矩形面积问题：常转化为高度数组
 
 [85. 最大矩形](https://leetcode.cn/problems/maximal-rectangle)：将每个坐标处的从之开始的向上的连续1的个数存到数组里，那么每一行的数据就可以转化为84题（高度数组求最大矩形）的做法，用单调栈即可
@@ -2681,6 +2713,10 @@ public:
 [260. 只出现一次的数字 III](https://leetcode.cn/problems/single-number-iii?envType=daily-question&envId=2023-10-16)：分组异或，每组各有一个目标值和其他成对的值
 
 [137. 只出现一次的数字 II](https://leetcode.cn/problems/single-number-ii)：每个位模三，算出目标值在该位上是0还是1
+
+
+
+
 
 ## 数学
 
