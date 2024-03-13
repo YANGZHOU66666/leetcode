@@ -139,13 +139,18 @@ arr[5][0]=6
 print(newArr,copyArr) #[1, 4, 10, 6, 7, [6, 5]] [1, 4, 3, 6, 7, [6, 5]]
 ```
 
-## string
+## str
 
 ### 字符串和数字的转化
 
 ```python
 s = "12"
 num = int(s)
+```
+
+```python
+num = 10
+s = str(n)
 ```
 
 ### 大小写相关
@@ -155,5 +160,113 @@ s = "string"
 newS1=s.capitalize() # 第一个字符大写，其他小写
 newS2=s.upper() # 全部大写
 newS3=s.lower() # 全部小写
+```
+
+### join和split
+
++ **join: **将字符串数组以某个字符串为分割组合起来
+
+```python
+words = ["apple", "banana", "cherry"]
+string = " ".join(words)  # 使用空格作为分隔符
+print(string)  # 输出： 'apple banana cherry'
+```
+
+
+
++ **split: **将字符串以某个字符为分界点分割为字符串数组
+
+```python
+string = "apple,banana,cherry"
+words = string.split(",")  # 指定逗号为分隔符
+print(words)  # 输出： ['apple', 'banana', 'cherry']
+```
+
+
+
+
+
+## file
+
+### 文件读取
+
++ **file = open(path, 'r')**
+
+```python
+# 打开文件
+file = open('example.txt', 'r')  # 'r'模式表示只读
+
+# 读取文件内容
+content = file.read()
+
+# 关闭文件
+file.close()
+```
+
+* **with open(path, 'r') as file**
+
+```python
+# 使用with语句自动管理文件资源
+with open('example.txt', 'r') as file:
+    content = file.read()
+    # with语句块内的代码执行完毕后，文件会被自动关闭
+```
+
+#### read, readline, readlines
+
++ read表示直接读完整个文件，上例所示content是整个文件所有内容的字符串
+
++ 还可以限制字符数：
+
+```python
+# 打开文件
+file = open('example.txt', 'r')
+
+# 分块读取文件
+chunk_size = 1024  # 假设我们每次读取1KB
+chunk = file.read(chunk_size)
+while chunk:
+    # 处理chunk
+    print(chunk)
+    chunk = file.read(chunk_size)
+
+# 文件会被自动关闭，因为with语句块已经执行完毕
+```
+
+
+
++ readlines可以将文件内容转化为一个按行分割的数组
+
+```python
+# 打开文件
+file = open('example.txt', 'r')
+
+# 读取所有行
+lines = file.readlines()
+
+# 关闭文件
+file.close()
+
+# 处理lines列表
+for line in lines:
+    print(line.strip())  # 使用strip()去除行尾的换行符
+
+```
+
+
+
++ readline表示一次读取一行，全读完了再readline就只有空字符串了
+
+```python
+# 打开文件
+file = open('example.txt', 'r')
+
+# 逐行读取
+line = file.readline()
+while line:
+    print(line.strip())
+    line = file.readline()
+
+# 文件会被自动关闭，因为with语句块已经执行完毕
 ```
 
