@@ -524,6 +524,44 @@ int longestWPI(vector<int>& hours) {
 
 ## 单调队列
 
+核心思想：如果后面的数字更好、更持久，就把前面的数踢了。换言之，你留在队列里的，要么是本身特别强，要么是能待的更持久。
+
+- 解决滑动窗口的最大值问题：
+
+239. 滑动窗口最大值
+
+对于一个滑动窗口内的几个数，如果排在左边的还反而小，那对我肯定没用。因为滑到后面肯定这个数是先出去的。因此我们只需要维护当前滑动窗口内的一个单调减的序列：如果排在右边的还大，那左边的就都不要了（因为必用不上）；如果排在右边的虽然没左边大，但因为左边的会先滑动出去，所以不确定这个后面要不要。
+
+思路：对一次滑动，在队列中去除本来就要滑出的那个数（如果它还在队列的话）；对新滑进来的那个数，从队列右边开始pop枚举，如果小于等于我们新的这个数，就可以踢出队列了（没新来的强也没新来的能待的持久）。把新来的这个数放进队列最右边。
+
+```c++
+vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        int n=nums.size();
+        deque<int> q;
+        for(int i=0;i<k;i++){
+            while(!q.empty()&&nums[q.back()]<=nums[i]){
+                q.pop_back();
+            }
+            q.push_back(i);
+        }
+        vector<int> ans;
+        ans.push_back(nums[q.front()]);
+        for(int i=1;i<n-k+1;i++){
+            if(q.front()<i){
+                q.pop_front();
+            }
+            while(!q.empty()&&nums[q.back()]<=nums[i+k-1]){
+                q.pop_back();
+            }
+            q.push_back(i+k-1);
+            ans.push_back(nums[q.front()]);
+        }
+        return ans;
+    }
+```
+
+
+
 + 解决一段子数组的和>target的最短问题
 
 [862. 和至少为K的最短子数组](https://leetcode.cn/problems/shortest-subarray-with-sum-at-least-k/)：
@@ -1288,11 +1326,89 @@ public:
 
 同样类型的还有：[1690. 石子游戏 VII](https://leetcode.cn/problems/stone-game-vii?envType=daily-question&envId=2024-02-03)
 
+### 思考：所给矩阵/数组各部分无差异的类型
+
+[2312. 卖木头块](https://leetcode.cn/problems/selling-pieces-of-wood?envType=daily-question&envId=2024-03-15)：注意这道题每个区块的木头是一样的，这意味着选择从(0,0)到(2,3)的木头块和选择从(10,0)到(12,3)的木头块没什么不同。因此dp\[i]\[j]应该设计成高i宽j的木头块的最大价值，而非给的大木头块(0,0)到(i,j)的最大价值。（如果设计成后者复杂度会大很多）这样，状态转移方程就是自然的了
+
+作为对比，打家劫舍/最长递增子序列这类题由于数组各部分不一样，必须按顺序从0到n进行dp
+
+```python
+class Solution:
+    def sellingWood(self, m: int, n: int, prices: List[List[int]]) -> int:
+        dic = dict()
+        for price in prices:
+            dic[price[0]*1000+price[1]]=price[2]
+        dp = [[0 for __ in range(n+1)] for _ in range(m+1)]
+        for _ in range(1,m+1):
+            for __ in range(1,n+1):
+                if _*1000+__ in dic:
+                    dp[_][__]=dic[_*1000+__]
+                for ___ in range(1,_):
+                    dp[_][__]=max(dp[_][__],dp[___][__]+dp[_-___][__])
+                for ___ in range(1,__):
+                    dp[_][__]=max(dp[_][__],dp[_][___]+dp[_][__-___])
+        return dp[m][n]
+```
+
+
+
+
+
+
+
 ### 子序列问题
+
+#### dp[i]表示拿i的最值
 
 [1027. 最长等差数列](https://leetcode.cn/problems/longest-arithmetic-subsequence/)：
 
 # ##########待施工##########
+
+#### 公共子序列
+
+[1143. 最长公共子序列](https://leetcode.cn/problems/longest-common-subsequence/description/)
+
+状态转移方程：dp\[i]\[j]表示text1[:i]和text2[:j]最长公共子序列长度（自然）
+
+枚举i, j：
+
+text1[i]==text2[j]时，拿i和j一换一肯定不亏，只管前面的。dp\[i]\[j] = dp\[i-1]\[j-1]+1
+
+text1[i]!=text2[j]时，这两个子串的最长公共子序列一定与text1[i]和text2[j]中的某一个无关。dp\[i]\[j] = max(dp\[i][j-1], dp\[i-1]\[j])
+
+````c++
+class Solution {
+public:
+    int longestCommonSubsequence(string text1, string text2) {
+        // dp[i][j]表示text1[:i]和text2[:j]的最长公共子序列
+        // 对每个i, 从0-len2枚举j, dp[i][j]=(text1[i]==text2[j]->dp[i-1][j-1]+1)(text1[i]!=text2[j]->max(dp[i][j-1],dp[i-1][j]))
+        // 
+        int n1 = text1.length();
+        int n2 = text2.length();
+        vector<vector<int>> dp(n1, vector<int>(n2,0));
+        for(int i=0;i<n1;i++){
+            if(i==0){
+                dp[i][0] = text1[0]==text2[0]?1:0;
+            }else{
+                dp[i][0]= text1[i]==text2[0]?1:dp[i-1][0];
+            }
+        }
+        for(int i=1;i<n2;i++){
+            dp[0][i] = text1[0]==text2[i]?1:dp[0][i-1];
+        }
+        for(int i=1;i<n1;i++){
+            for(int j=1;j<n2;j++){
+                if(text1[i]==text2[j]){
+                    dp[i][j] = dp[i-1][j-1]+1;
+                }else{
+                    dp[i][j]=max(dp[i-1][j],dp[i][j-1]);
+                }
+            }
+        }
+        return dp[n1-1][n2-1];
+    }
+};
+````
 
 ### 区间DP
 
@@ -1613,6 +1729,8 @@ int maxResult(vector<int>& nums, int k) {
     return dp[n-1];
 }
 ```
+
+
 
 
 
@@ -2716,6 +2834,55 @@ for(int i=1;i<k;i++){
 
 
 
+## 树状数组
+
+背景：数组需要频繁修改和查找某区间和。传统的前缀和解决不了修改的问题，每次修改都要重新计算整个数组的前缀和。
+
+解决方法：设计一种变形的前缀和数组，每个位置管一部分子序列的前缀和。（便于理解，这里下标从i开始）对于第i个前缀和，算i中质因子2的个数k，存i及i之前的$2^k$个数的和
+
+![](./assets/树状数组.png)
+
+例如：prefix_sum[6]存储nums[5:6]的和，prefix_sum[16]存储nums[1:16]的和
+
+### 树状数组模板题
+
+[区域和检索 - 数组可修改](https://leetcode.cn/problems/range-sum-query-mutable/)
+
+```c++
+class NumArray {
+private:
+    vector<int> nums;
+    vector<int> tree;
+
+    int prefixSum(int i) {
+        int s = 0;
+        for (; i > 0; i &= i - 1) {
+            s += tree[i];
+        }
+        return s;
+    }
+
+public:
+    NumArray(vector<int> &nums) : nums(nums.size()), tree(nums.size() + 1) {
+        for (int i = 0; i < nums.size(); i++) {
+            update(i, nums[i]);
+        }
+    }
+
+    void update(int index, int val) {
+        int delta = val - nums[index];
+        nums[index] = val;
+        for (int i = index + 1; i < tree.size(); i += i & -i) {
+            tree[i] += delta;
+        }
+    }
+
+    int sumRange(int left, int right) {
+        return prefixSum(right + 1) - prefixSum(left);
+    }
+};
+```
+
 
 
 ## 数学
@@ -2727,6 +2894,28 @@ int gcd(int x,int y){
     return y?gcd(y,x%y):x;
 }
 ```
+
+
+
+
+
+### 组合
+
+[2338. 统计理想数组的数目 - 力扣（LeetCode）](https://leetcode.cn/problems/count-the-number-of-ideal-arrays/description/)
+
+难点是将题目映射到合适的数学模型上（废话……）
+
+对于结尾为$num$，长度为n的“理想数组”，考虑$num$的质数分解，就是把它的质数分配到n个盒子里
+
+比如：$num=12$，“理想数组”为$[1,2,2,2,12]$，那么每个盒子里就是：[空, 2, 空, 空, 2和3]
+
+因此，问题转化为枚举所有$num∈[1,maxValue]$，对其质因子分解，转化为组合问题
+
+对k个同颜色的球，自由扔到n个盒子里，盒子允许为空：
+
+等价于对k+n个同颜色的球，扔到n个盒子里，盒子不允许为空
+
+等价于对k+n个球的缝隙里差n-1个板子，即$C_{k+n-1}^{n-1}=C_{k+n-1}^k$
 
 
 

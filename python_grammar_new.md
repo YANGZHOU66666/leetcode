@@ -143,15 +143,44 @@ print(newArr,copyArr) #[1, 4, 10, 6, 7, [6, 5]] [1, 4, 3, 6, 7, [6, 5]]
 
 ### 字符串和数字的转化
 
-```python
-s = "12"
-num = int(s)
-```
++ number转string：
 
 ```python
 num = 10
-s = str(n)
+ten = str(num)
 ```
+
++ string转number：
+
+```python
+ten = "10"
+num = int(ten)
+```
+
++ float转string：
+
+```python
+f = 123.456
+s = str(f)
+```
+
++ string转float
+
+```python
+s = "10.23"
+f = float(s)
+```
+
+**不能让数字和字符串直接相加**
+
++ float转int
+
+```python
+```
+
+
+
+
 
 ### 大小写相关
 
@@ -180,6 +209,66 @@ print(string)  # 输出： 'apple banana cherry'
 string = "apple,banana,cherry"
 words = string.split(",")  # 指定逗号为分隔符
 print(words)  # 输出： ['apple', 'banana', 'cherry']
+```
+
+
+
+### 格式化字符串（类似js模板字符串）
+
+以f开头，用大括号包裹变量名，可以变成字符串
+
+```python
+name = "tom"
+s = f"my name is {name}"
+print(s)
+```
+
+
+
+### 检验字符串为全数字/大小写字母等
+
+```python
+s.isdigit()
+s.isupper()
+s.islower()
+```
+
+### 四舍五入保留小数
+
+```python
+s = "10.2375435"
+f = float(s)
+print("{:.2f}".format(f))
+```
+
+## dict
+
+创建字典：
+
+```python
+dic1 = dict()
+dic2 = {"name": "John", "age": 30, "city": "New York"}
+```
+
+遍历字典：
+
+```python
+for key, value in dic2.items():
+    print(key, value)
+
+for key in dic2.keys():
+    print(key,dic2[key])
+
+for value in dic2.values():
+    print(value)
+```
+
+判断某键是否在字典里面：
+
+`"key" in dic`
+
+```python
+print("gender" in dic)
 ```
 
 
@@ -253,6 +342,10 @@ for line in lines:
 
 ```
 
+==特别提醒：readlines末尾是有换行符的！==
+
+
+
 
 
 + readline表示一次读取一行，全读完了再readline就只有空字符串了
@@ -267,6 +360,91 @@ while line:
     print(line.strip())
     line = file.readline()
 
-# 文件会被自动关闭，因为with语句块已经执行完毕
+
+```
+
+
+
+### 文件写入
+
+```
+
+```
+
+
+
+
+
+## io
+
+### input
+
+```python
+inp = input() # 默认为字符串，读到/n为止，不含/n
+inp_with_prompt = input("prompt")
+
+# 常用处理:
+num = int(input()) # 将input的字符串转化为int
+arr = input().split() # 将输入的一些数字组成的字符串分开成数组
+```
+
+==注意！input().split()和input().split(" ")还是有不同的！后者在字符前后有多余空格时会出事，而前者不会==
+
+```python
+x = '5  10\n    '
+lis1 = x.split(" ")
+print(lis1) # ['5', '', '10\n', '', '', '', '']
+lis2 = x.split()
+print(lis2) # ['5', '10']
+```
+
+### output
+
+```python
+s = "hello, world"
+print(s) # 默认带'/n'
+print(s, end="") # 不换行
+```
+
+#### format output
+
+`str`自带的`ljust(), rjust(), center()`方法：
+
+```python
+# 自动补全为长达10的字符串，原内容左对齐
+print("aaaa".ljust(10), "aa".ljust(10), "cccccc".ljust(10))
+print("d".ljust(10), "25".ljust(10), "33333".ljust(10))
+print("eee".ljust(10), "30".ljust(10), "fff".ljust(10))
+```
+
+```
+aaaa       aa         cccccc    
+d          25         33333
+eee        30         fff
+```
+
+
+
+## system
+
+### time
+
+```python
+import datetime
+now = datetime.datetime.now()
+year = now.year
+```
+
+
+
+## math
+
+```python
+a = 10
+b = 3
+print(pow(a,b)) # 如果两个数都是整数则返回整数，有一个数是浮点数则返回浮点数
+# 也可以用：
+print(a**b)
+
 ```
 
