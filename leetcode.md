@@ -432,6 +432,40 @@ public:
 };
 ```
 
+### 区间贪心
+
+[55. 跳跃游戏](https://leetcode.cn/problems/jump-game/) & [45. 跳跃游戏 II](https://leetcode.cn/problems/jump-game-ii/)
+
+思路：
+
+从前到后遍历数组，始终维护两个变量“当前我这步最远能走到哪”，“我的下一步最远能走到哪”
+
+当遍历到当前这步最远能走到的地方时，这时如果没有走到目标，就不得不跳下一步了。下一步我们当然要选下一步能走到最远的位置，ans+1，更新”当前我这步最远能走到哪“，继续向前走
+
+以跳跃游戏II为例：
+
+```c++
+class Solution {
+public:
+    int jump(vector<int>& nums) {
+        int n=nums.size();
+        int cur_right = 0; // 当前这步最远能走到哪，刚开始当然就只能走到起点
+        int nex_right = 0; // 下一步最远能走到哪
+        int ans = 0;
+        for(int i=0;i<n-1;i++){
+            nex_right = max(nex_right, nums[i]+i);
+            if(i==cur_right){ // 走到当前这一跳能跳到的最远的地方了，不得不进行下一跳
+                ans++;
+                cur_right = nex_right;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+
+
 ## 单调栈
 
 + 单调栈模板：
@@ -559,8 +593,6 @@ vector<int> maxSlidingWindow(vector<int>& nums, int k) {
         return ans;
     }
 ```
-
-
 
 + 解决一段子数组的和>target的最短问题
 
