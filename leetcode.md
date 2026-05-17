@@ -1656,10 +1656,6 @@ public:
 };
 ```
 
-
-
-
-
 [834. 树中距离之和](https://leetcode.cn/problems/sum-of-distances-in-tree/)：
 
 首先，任找一节点（为了方便一般选0节点）作为根节点算出其到每个节点的距离之和（复杂度o(n)），然后从该点开始进行换根DP。根节点每移动一次后，相对它之前的那个节点prev，在prev这一侧的每个节点的距离都加一，而反方向的每个节点的距离都减一
@@ -2547,7 +2543,173 @@ class Solution {
 
 ### 前序、中序、后序遍历
 
-# #########待施工########
+#### 递归写法
+
+只要区分好“遍历左子树”“遍历右子树”“输出当前节点”的顺序即可
+
+**前序遍历：**根左右，因此先输出根，然后遍历左子树、遍历右子树
+
+```c++
+vector<int> ans;
+void dfs(TreeNode* root){
+    if(root==NULL){
+        return;
+	}
+	ans.push_back(root->val);
+    dfs(root->left);
+    dfs(root->right);
+}
+```
+
+**中序遍历：**左根右
+
+```C++
+vector<int> ans;
+void dfs(TreeNode* root){
+    if(root==NULL){
+        return;
+    }
+    dfs(root->left);
+    ans.push_back(root->val);
+    dfs(root->right);
+}
+```
+
+**后序遍历：**左右根
+
+```C++
+vector<int> ans;
+void dfs(TreeNode* root){
+    if(root==NULL){
+        return;
+    }
+    dfs(root->left);
+    dfs(root->right);
+    ans.push_back(root->val);
+}
+```
+
+#### 迭代写法
+
+**前序遍历：**简单。对于每个拿到的cur，先打印它，然后右、左节点依次入栈。
+
+```C++
+vector<int> preorderTraversal(TreeNode* root) {
+    vector<int> ans;
+    if(root==NULL){
+        return ans;
+    }
+    stack<TreeNode*> stk;
+    stk.push(root);
+    while(!stk.empty()){
+        TreeNode* cur = stk.top(); stk.pop();
+        ans.push_back(cur->val);
+        if(cur->right){
+            stk.push(cur->right);
+        }
+        if(cur->left){
+            stk.push(cur->left);
+        }
+    }
+    return ans;
+}
+```
+
+**中序遍历：**有点难度。一个tra用于维护当前需要探索左子树的节点。思路：对于每次循环，
+
+1. 从当前的tra，左节点序列一直入栈
+2. 弹栈，拿到的一定是未遍历部分最左的。遍历它，然后tra=它的右孩子。因为它的左子树和它本身都被遍历了。如果右孩子为空，那么下一轮循环就不会有1. 左节点序列入栈的流程，直接再次弹栈
+3. 从1开始循环
+
+```C++
+vector<int> inorderTraversal(TreeNode* root) {
+    vector<int> ans;
+    if(root==NULL){
+        return ans;
+    }
+    stack<TreeNode*> stk;
+    TreeNode* tra = root;
+    while(tra||(!stk.empty())){
+        while(tra){
+            stk.push(tra);
+            tra = tra->left;
+        }
+        tra = stk.top(); stk.pop(); // 保证是未遍历的部分的最左
+        ans.push_back(tra->val);
+        tra = tra->right; // 遍历完当前节点的左子树和当前节点后，开始探索当前节点的右子树
+    }
+    return ans;
+}
+```
+
+**后序遍历：**难。给出两种写法，一种最精炼但是感觉不够自然；一种想法自然，但是节点出入栈两次，且要维护额外的是否遍历过的标记
+
+- 写法一：精炼但难写。维护两个指针：tra，工作指针，用于指向需要探索左子树的节点/左子树为NULL的节点（也就是探索完这个左子树序列的终状态）；prev，历史指针，用于维护上一个遍历的节点。思路：对于每次循环，
+  1. tra左子树序列依次入栈，直到左子树为空
+  2. 拿栈顶元素top（注意这里不要赋值给tra），这里由于入栈的顺序，top一定没有左孩子或左孩子被遍历过。讨论：若top没有右子树或右孩子为prev（即刚刚被遍历过），说明该遍历top了，弹栈，遍历top，prev=top；若top有右子树且右子树没被遍历过，先遍历top右子树（tra=top->right）
+  3. 从1开始，继续循环
+
+```C++
+vector<int> postorderTraversal(TreeNode* root) {
+    vector<int> ans;
+    if(root==NULL){
+        return ans;
+    }
+    stack<TreeNode*> stk;
+    TreeNode* tra = root; // 注意这里不放root到stk里
+    TreeNode* prev = NULL;
+    while(tra||!stk.empty()){
+        while(tra){
+            stk.push(tra);
+            tra = tra->left;
+        }
+        // 保证栈顶元素一定没有左孩子/左孩子被遍历过
+        TreeNode* top = stk.top(); // 注意这里不能pop，因为栈顶元素不一定是下一个要遍历的；注意这里不能直接拿tra来取栈顶元素
+        if(top->right==NULL||top->right==prev){
+            // 栈顶元素右孩子无值，或者栈顶元素的右孩子刚刚遍历过：该遍历这个节点了
+            ans.push_back(top->val);
+            prev = top;
+            stk.pop();
+        }else{
+            // 栈顶元素右孩子有值，且没被遍历过（prev不是栈顶的右孩子）：tra变成右孩子
+            tra = top->right;
+        }
+    }
+    return ans;
+}
+```
+
+- 写法二：自然写法。一个自然的想法是，由于左右根顺序，那么先压根，再压右，最后压左。问题在于，不知道当前从栈中弹出的这个节点，它的左右子树是遍历过了还是没有。因此需要引入一个标记，记录当前节点是第一次还是第二次被放进栈中。第一次放的时候保证它的右左子树后于它放进栈里，因此第二次弹出时，右左子树已经遍历完，可以接着遍历它。
+
+  事实上，**这个自然的写法，也可以完美覆盖前序中序的遍历，只要改一下左/右/根节点的压栈顺序，可以算作一套通解通法**。
+
+```C++
+vector<int> postorderTraversal(TreeNode* root) {
+    vector<int> ans;
+    if(root==NULL){
+        return ans;
+    }
+    stack<pair<TreeNode*,bool>> stk; // false-第一次入栈；true-第二次入栈
+    stk.push(make_pair(root,false));
+    while(!stk.empty()){
+        auto cur = stk.top(); stk.pop();
+        TreeNode* cur_node = cur.first;
+        bool cur_visited = cur.second;
+        if(!cur_visited){
+            stk.push(make_pair(cur_node, true));
+            if(cur_node->right){
+                stk.push(make_pair(cur_node->right, false));
+            }
+            if(cur_node->left){
+                stk.push(make_pair(cur_node->left, false));
+            }
+        }else{
+            ans.push_back(cur_node->val);
+        }
+    }
+    return ans;
+}
+```
 
 ### 还原二叉树
 
